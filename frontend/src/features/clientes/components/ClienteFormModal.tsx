@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
 
-import { FormSheet } from '@/components/FormSheet'
+import { FormModal } from '@/components/FormModal'
 import { formatarCpf, formatarTelefone } from '@/lib/formatters'
 
 import { useSalvarCliente, type Cliente } from '../api'
@@ -13,12 +13,12 @@ interface Props {
   cliente: Cliente | null
 }
 
-/** Painel de cadastro e edição de cliente. Carregado sob demanda pela listagem (`lazy`). */
-export default function ClienteFormSheet({ aberto, aoFechar, cliente }: Props) {
+/** Modal de cadastro e edição de cliente. Carregado sob demanda pela listagem (`lazy`). */
+export default function ClienteFormModal({ aberto, aoFechar, cliente }: Props) {
   const salvar = useSalvarCliente()
 
   return (
-    <FormSheet
+    <FormModal
       aberto={aberto}
       aoFechar={aoFechar}
       titulo={cliente ? 'Editar cliente' : 'Novo cliente'}
@@ -43,6 +43,6 @@ export default function ClienteFormSheet({ aberto, aoFechar, cliente }: Props) {
           aoFechar()
         }}
       />
-    </FormSheet>
+    </FormModal>
   )
 }

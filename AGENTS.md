@@ -70,9 +70,9 @@ Requisitos: JDK 21 ou mais novo, Node 24 (ver `.nvmrc`), pnpm e Docker. Não é 
 
 **Frontend**
 - API somente por `@/lib/http` + hooks do TanStack Query definidos em `features/<modulo>/api.ts`.
-- **Design system obrigatório** ([docs/design-system.md](docs/design-system.md)): telas montadas com os blocos de `src/components/` (`PageHeader`, `DataTable`, `FormSheet`, `ConfirmDialog`…), copiando a estrutura de `ClientesPage`. Nunca crie visual próprio.
+- **Design system obrigatório** ([docs/design-system.md](docs/design-system.md)): telas montadas com os blocos de `src/components/` (`PageHeader`, `DataTable`, `FormModal`, `ConfirmDialog`…), copiando a estrutura de `ClientesPage`. Nunca crie visual próprio.
 - Cores, fontes e raios só pelos tokens de `src/index.css` (`bg-primary`, `text-destructive`…). Proibido cor fixa (`#hex`, `bg-orange-600`).
-- Uma rota por módulo: cadastro e edição no painel lateral (`FormSheet`, com `lazy()`), exclusão pela lixeira vermelha + `ConfirmDialog`.
+- Uma rota por módulo: cadastro e edição em modal (`FormModal`, com `lazy()`), exclusão pela lixeira vermelha + `ConfirmDialog`.
 - Formulários com React Hook Form + Zod. A `DataTable` já trata carregando, erro, vazio e com dados.
 - TypeScript sem `any`.
 

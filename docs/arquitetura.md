@@ -54,13 +54,13 @@ backend/src/main/java/br/com/carrental/
 
 frontend/src/
 ├── app/                     roteador, layout e páginas gerais
-├── components/              blocos do design system (PageHeader, DataTable, FormSheet…)
+├── components/              blocos do design system (PageHeader, DataTable, FormModal…)
 │   └── ui/                  componentes base do shadcn/ui
 ├── features/
 │   └── clientes/            uma pasta por módulo
 │       ├── api.ts               chamadas HTTP + hooks do TanStack Query
 │       ├── schema.ts            validação do formulário (Zod)
-│       ├── components/          formulário e painel do módulo
+│       ├── components/          formulário e modal do módulo
 │       └── pages/               tela de listagem (uma rota por módulo)
 └── lib/                     código usado por mais de um módulo (http, formatadores)
 ```

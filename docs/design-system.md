@@ -6,10 +6,10 @@ A tela de referência é `frontend/src/features/clientes/pages/ClientesPage.tsx`
 
 ## Princípios
 
-1. **Uma tela por módulo.** Cada módulo tem uma página de listagem. Cadastrar, editar e excluir acontecem **sobre a listagem** (painel lateral e diálogo), nunca em outra página ou rota.
+1. **Uma tela por módulo.** Cada módulo tem uma página de listagem. Cadastrar, editar e excluir acontecem **sobre a listagem** (modal e diálogo de confirmação), nunca em outra página ou rota.
 2. **Monte, não estilize.** Uma tela é a combinação dos blocos prontos. Se você está escrevendo muitas classes de cor, borda e espaçamento em uma página, está fazendo errado.
 3. **Laranja é ação, vermelho é perigo.** O laranja marca a ação principal da tela (uma por tela). Vermelho aparece só em exclusão e erro.
-4. **A página não rola.** A tela ocupa exatamente a altura da janela. Se a lista não couber, quem rola é a área da tabela (com o cabeçalho fixo), nunca a página. Listagens trazem 15 registros por página (`TAMANHO_PAGINA`).
+4. **A página não rola.** A tela ocupa exatamente a altura da janela. Se a lista não couber, quem rola é a área da tabela (com o cabeçalho fixo), nunca a página. Listagens trazem 20 registros por página (`TAMANHO_PAGINA`).
 5. **Fundo claro, barra escura.** Conteúdo sobre fundo creme, sem cartões em volta das tabelas; a navegação fica na barra escura do topo.
 
 ## Tokens
@@ -22,7 +22,7 @@ Definidos em um único lugar: `frontend/src/index.css` (bloco `:root`). Mudar um
 | --- | --- | --- |
 | `--background` | `bg-background` | Fundo da aplicação |
 | `--foreground` | `text-foreground` | Texto principal, bordas fortes |
-| `--card` | `bg-card` | Superfícies elevadas: campos, painel, diálogo |
+| `--card` | `bg-card` | Superfícies elevadas: campos, modal, diálogo |
 | `--muted` | `bg-muted` | Fundos discretos, hover de linha |
 | `--muted-foreground` | `text-muted-foreground` | Texto secundário, cabeçalho de tabela |
 | `--primary` | `bg-primary`, `text-primary` | Laranja da marca: botão principal |
@@ -39,7 +39,7 @@ Precisa de uma cor que não existe (ex.: verde para "disponível")? Crie um toke
 
 | Uso | Classe |
 | --- | --- |
-| Títulos (página, painel, diálogo) | `font-heading font-bold` (Sora) |
+| Títulos (página, modal, diálogo) | `font-heading font-bold` (Sora) |
 | Todo o resto | padrão (Inter), `text-sm` |
 | Números em tabela (CPF, telefone, valores) | `tabular-nums` (já aplicado por `numerica: true` na `DataTable`) |
 
@@ -62,10 +62,10 @@ Ficam em `frontend/src/components/`. Use estes antes de criar qualquer coisa.
 | `DataTable` | Tabela de listagem; já trata carregando, erro, vazio e dados; rola por dentro com cabeçalho fixo |
 | `BotaoEditar`, `BotaoExcluir` | Ações da linha: lápis e lixeira vermelha |
 | `Pagination` | Rodapé "Página X de Y" com Anterior/Próxima |
-| `FormSheet`, `FormSheetBody`, `FormSheetFooter` | Painel lateral de cadastro e edição |
+| `FormModal`, `FormModalBody`, `FormModalRow`, `FormModalFooter` | Modal de cadastro e edição |
 | `ConfirmDialog` | Confirmação de ação destrutiva |
 
-Base (shadcn/ui), em `frontend/src/components/ui/`: `Button`, `Input`, `Field`/`FieldLabel`/`FieldError`, `Skeleton`, `Sheet`, `AlertDialog`, `Toaster`.
+Base (shadcn/ui), em `frontend/src/components/ui/`: `Button`, `Input`, `Field`/`FieldLabel`/`FieldError`, `Skeleton`, `Dialog`, `AlertDialog`, `Toaster`.
 
 ### Botões
 
@@ -96,18 +96,18 @@ Base (shadcn/ui), em `frontend/src/components/ui/`: `Button`, `Input`, `Field`/`
 
   <Pagination pagina={data.pagina} totalPaginas={data.totalPaginas} aoMudar={setPagina} />
 
-  {/* painel de formulário (lazy) e ConfirmDialog */}
+  {/* modal de formulário (lazy) e ConfirmDialog */}
 </>
 ```
 
 ### Formulários
 
-- Sempre dentro de `FormSheet` (painel lateral à direita; em celular ocupa a tela toda).
-- Campos em **uma coluna**, cada um com `Field` + `FieldLabel` + `Input` + `FieldError`.
-- O `<form>` tem a classe `flex min-h-0 flex-1 flex-col` e contém `FormSheetBody` (campos) e `FormSheetFooter` (Cancelar + enviar).
-- O mesmo painel serve para cadastrar e editar; mudam o título e o rótulo do botão ("Cadastrar cliente" / "Salvar alterações").
-- O componente do painel é carregado sob demanda com `lazy()` + `Suspense`, como em `ClientesPage`, para não pesar a listagem.
-- Erro de campo aparece abaixo do campo; erro geral, no fim do formulário. Sucesso: `toast.success` e o painel fecha.
+- Sempre dentro de `FormModal` (modal centralizado sobre a listagem). Não use painel lateral nem página separada.
+- Cada campo com `Field` + `FieldLabel` + `Input` + `FieldError`. Campos em uma coluna; dois campos curtos relacionados podem ficar lado a lado com `FormModalRow` (ex.: CPF e telefone).
+- O `<form>` tem a classe `flex min-h-0 flex-1 flex-col` e contém `FormModalBody` (campos) e `FormModalFooter` (Cancelar + enviar).
+- O mesmo modal serve para cadastrar e editar; mudam o título e o rótulo do botão ("Cadastrar cliente" / "Salvar alterações").
+- O componente do modal é carregado sob demanda com `lazy()` + `Suspense`, como em `ClientesPage`, para não pesar a listagem.
+- Erro de campo aparece abaixo do campo; erro geral, no fim do formulário. Sucesso: `toast.success` e o modal fecha.
 
 ### Exclusão
 
@@ -130,4 +130,4 @@ Itens da barra superior ficam em `MENU`, em `frontend/src/app/layout/AppLayout.t
 - **Novo componente base:** `pnpm dlx shadcn@latest add <componente>`. Ele já herda os tokens.
 - **Ajuste visual de um componente base** (`components/ui`): só como mudança do design system, combinada com o grupo, porque afeta todas as telas.
 - **Mudança de identidade** (cor, fonte, raio): somente em `index.css`.
-- Referência visual original das telas: https://claude.ai/artifact/Ugaqq2jrgt2f2yWo8ZgTJo (direção "C · Laranja Pista"; acesso restrito a quem recebeu o compartilhamento).
+- Referência visual original das telas: https://claude.ai/artifact/Ugaqq2jrgt2f2yWo8ZgTJo (direção "C · Laranja Pista", com o formulário em modal central no lugar do painel lateral; acesso restrito a quem recebeu o compartilhamento).

@@ -7,7 +7,7 @@ import { NotFoundPage } from './pages/NotFoundPage'
 
 /**
  * Todas as rotas da aplicação. Cada módulo tem UMA rota de listagem;
- * cadastro, edição e exclusão acontecem em painel/diálogo sobre ela.
+ * cadastro, edição e exclusão acontecem em modal sobre ela.
  */
 export const router = createBrowserRouter([
   {

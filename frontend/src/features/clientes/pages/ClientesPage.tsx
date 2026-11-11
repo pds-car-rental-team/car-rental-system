@@ -15,8 +15,8 @@ import { useValorAtrasado } from '@/lib/useValorAtrasado'
 
 import { useClientes, useExcluirCliente, type Cliente } from '../api'
 
-// O formulário só é baixado quando o usuário abre o painel pela primeira vez.
-const ClienteFormSheet = lazy(() => import('../components/ClienteFormSheet'))
+// O formulário só é baixado quando o usuário abre o modal pela primeira vez.
+const ClienteFormModal = lazy(() => import('../components/ClienteFormModal'))
 
 const COLUNAS: Coluna<Cliente>[] = [
   { cabecalho: 'Nome', celula: (c) => c.nome, principal: true },
@@ -26,7 +26,7 @@ const COLUNAS: Coluna<Cliente>[] = [
 ]
 
 /** `sessao` muda a cada abertura para o formulário sempre começar limpo. */
-interface PainelFormulario {
+interface ModalFormulario {
   sessao: number
   aberto: boolean
   cliente: Cliente | null
@@ -35,15 +35,15 @@ interface PainelFormulario {
 export function ClientesPage() {
   const [busca, setBusca] = useState('')
   const [pagina, setPagina] = useState(0)
-  const [painel, setPainel] = useState<PainelFormulario | null>(null)
+  const [modal, setModal] = useState<ModalFormulario | null>(null)
   const [paraExcluir, setParaExcluir] = useState<Cliente | null>(null)
 
   const buscaAplicada = useValorAtrasado(busca.trim())
   const { data, isPending, error, refetch } = useClientes({ busca: buscaAplicada, pagina })
   const excluir = useExcluirCliente()
 
-  function abrirPainel(cliente: Cliente | null) {
-    setPainel((atual) => ({ sessao: (atual?.sessao ?? 0) + 1, aberto: true, cliente }))
+  function abrirModal(cliente: Cliente | null) {
+    setModal((atual) => ({ sessao: (atual?.sessao ?? 0) + 1, aberto: true, cliente }))
   }
 
   function confirmarExclusao() {
@@ -69,7 +69,7 @@ export function ClientesPage() {
             setPagina(0)
           }}
         />
-        <Button onClick={() => abrirPainel(null)}>
+        <Button onClick={() => abrirModal(null)}>
           <PlusIcon /> Novo cliente
         </Button>
       </PageHeader>
@@ -86,7 +86,7 @@ export function ClientesPage() {
         }
         acoes={(cliente) => (
           <>
-            <BotaoEditar rotulo={`Editar ${cliente.nome}`} onClick={() => abrirPainel(cliente)} />
+            <BotaoEditar rotulo={`Editar ${cliente.nome}`} onClick={() => abrirModal(cliente)} />
             <BotaoExcluir rotulo={`Excluir ${cliente.nome}`} onClick={() => setParaExcluir(cliente)} />
           </>
         )}
@@ -94,13 +94,13 @@ export function ClientesPage() {
 
       {data && <Pagination pagina={data.pagina} totalPaginas={data.totalPaginas} aoMudar={setPagina} />}
 
-      {painel && (
+      {modal && (
         <Suspense fallback={null}>
-          <ClienteFormSheet
-            key={painel.sessao}
-            aberto={painel.aberto}
-            cliente={painel.cliente}
-            aoFechar={() => setPainel((atual) => atual && { ...atual, aberto: false })}
+          <ClienteFormModal
+            key={modal.sessao}
+            aberto={modal.aberto}
+            cliente={modal.cliente}
+            aoFechar={() => setModal((atual) => atual && { ...atual, aberto: false })}
           />
         </Suspense>
       )}

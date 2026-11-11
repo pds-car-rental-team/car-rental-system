@@ -19,7 +19,7 @@ O sistema é pequeno, então a regra é: **não otimize por antecipação, mas n
 
 - **Cache de servidor é do TanStack Query.** Não copie dados da API para `useState` nem refaça requisição que já está em cache.
 - **Busca digitada tem atraso** (`useValorAtrasado`, ~300 ms) antes de chamar a API, como em `ClientesPage`.
-- **Formulários são carregados sob demanda** (`lazy()` + `Suspense`): o código do painel só é baixado quando o usuário o abre.
+- **Formulários são carregados sob demanda** (`lazy()` + `Suspense`): o código do modal só é baixado quando o usuário o abre.
 - Use `placeholderData: keepPreviousData` em listagens paginadas, para a tabela não piscar ao trocar de página.
 - Não use `useMemo`/`useCallback` por padrão; só quando houver um problema medido.
 - Listas sempre com `key` estável (o `id` do registro), nunca o índice quando os itens podem mudar.

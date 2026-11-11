@@ -8,12 +8,12 @@ Referência: `frontend/src/features/clientes`.
 features/<modulo>/
 ├── api.ts          tipos da API, funções HTTP e hooks do TanStack Query
 ├── schema.ts       schema Zod do formulário e o tipo inferido
-├── components/     componentes usados só neste módulo (formulário e painel)
+├── components/     componentes usados só neste módulo (formulário e modal)
 └── pages/          a tela de listagem do módulo (<Modulo>Page.tsx)
 ```
 
 Rotas ficam em `src/app/router.tsx`; o menu, em `src/app/layout/AppLayout.tsx`.
-Cada módulo tem **uma rota**: cadastro, edição e exclusão acontecem em painel e diálogo sobre a listagem.
+Cada módulo tem **uma rota**: cadastro, edição e exclusão acontecem em modal sobre a listagem.
 
 > A aparência das telas é definida em [design-system.md](design-system.md). Leia-o antes de criar ou alterar qualquer tela.
 
@@ -31,12 +31,12 @@ Cada módulo tem **uma rota**: cadastro, edição e exclusão acontecem em paine
 
 **Formulários**
 - React Hook Form + Zod (`zodResolver`). As regras do schema repetem as do `Request` do backend, com as mesmas mensagens.
-- Todo formulário abre no painel lateral (`FormSheet`), carregado sob demanda com `lazy()`. Não crie rota ou página para formulário.
+- Todo formulário abre em modal (`FormModal`), carregado sob demanda com `lazy()`. Não crie rota ou página para formulário.
 - Erros da API voltam para o formulário: erros de campo (`erro.errosDeCampo`) com `setError` no campo; demais, em `root`. Veja `ClienteForm.tsx`.
 - Máscaras e validações de documento ficam em `@/lib/formatters`. Para a API vai somente dígitos.
 
 **Interface** (detalhes em [design-system.md](design-system.md))
-- Monte a tela com os blocos de `src/components/` (`PageHeader`, `SearchInput`, `DataTable`, `Pagination`, `FormSheet`, `ConfirmDialog`, `BotaoEditar`, `BotaoExcluir`). Não crie tabela, cabeçalho, modal ou botão de ação próprios.
+- Monte a tela com os blocos de `src/components/` (`PageHeader`, `SearchInput`, `DataTable`, `Pagination`, `FormModal`, `ConfirmDialog`, `BotaoEditar`, `BotaoExcluir`). Não crie tabela, cabeçalho, modal ou botão de ação próprios.
 - Componentes base vêm do shadcn/ui (`src/components/ui`). Para adicionar um: `pnpm dlx shadcn@latest add <componente>`.
 - Estilo só com classes do Tailwind e com os tokens do tema (`bg-primary`, `text-muted-foreground`, `text-destructive`). Não use cor fixa (`#fff`, `bg-blue-500`) nem arquivo CSS por componente.
 - Ícones: `lucide-react`.
