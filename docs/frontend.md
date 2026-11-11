@@ -50,7 +50,7 @@ A `DataTable` já faz isso: passe `carregando`, `erro`, `aoTentarNovamente` e `v
 
 **Acessibilidade**
 - Todo campo tem `label` ligado por `htmlFor`/`id`. Botão só com ícone tem `aria-label`.
-- A tela precisa funcionar em largura de celular: a página nunca rola na horizontal (a `DataTable` rola dentro da própria área).
+- A tela precisa funcionar em largura de celular: a página nunca rola, nem na vertical nem na horizontal (a `DataTable` rola dentro da própria área).
 
 **Texto**
 - Tudo em português do Brasil. Botões dizem a ação ("Cadastrar cliente", "Salvar alterações"), não "OK"/"Enviar".

@@ -8,7 +8,7 @@ const MENU = [{ rotulo: 'Clientes', para: '/clientes' }]
 
 export function AppLayout() {
   return (
-    <div className="flex min-h-svh flex-col">
+    <div className="flex h-svh flex-col">
       <div className="bg-header text-header-foreground">
         <div className="flex flex-wrap items-center gap-x-9 px-4 sm:px-10">
           <div className="flex min-h-16 items-center gap-2.5">
@@ -37,8 +37,9 @@ export function AppLayout() {
         </div>
       </div>
 
-      <main className="flex-1 px-4 py-8 sm:p-10">
-        <div className="mx-auto flex max-w-[70rem] flex-col gap-6">
+      {/* A página nunca rola: quem rola é a área da tabela (DataTable). */}
+      <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-10 sm:py-8">
+        <div className="mx-auto flex h-full max-w-[70rem] flex-col gap-6">
           <Outlet />
         </div>
       </main>

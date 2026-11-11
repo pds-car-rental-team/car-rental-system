@@ -9,7 +9,8 @@ A tela de referência é `frontend/src/features/clientes/pages/ClientesPage.tsx`
 1. **Uma tela por módulo.** Cada módulo tem uma página de listagem. Cadastrar, editar e excluir acontecem **sobre a listagem** (painel lateral e diálogo), nunca em outra página ou rota.
 2. **Monte, não estilize.** Uma tela é a combinação dos blocos prontos. Se você está escrevendo muitas classes de cor, borda e espaçamento em uma página, está fazendo errado.
 3. **Laranja é ação, vermelho é perigo.** O laranja marca a ação principal da tela (uma por tela). Vermelho aparece só em exclusão e erro.
-4. **Fundo claro, barra escura.** Conteúdo sobre fundo creme, sem cartões em volta das tabelas; a navegação fica na barra escura do topo.
+4. **A página não rola.** A tela ocupa exatamente a altura da janela. Se a lista não couber, quem rola é a área da tabela (com o cabeçalho fixo), nunca a página. Listagens trazem 10 registros por página (`TAMANHO_PAGINA`).
+5. **Fundo claro, barra escura.** Conteúdo sobre fundo creme, sem cartões em volta das tabelas; a navegação fica na barra escura do topo.
 
 ## Tokens
 
@@ -58,7 +59,7 @@ Ficam em `frontend/src/components/`. Use estes antes de criar qualquer coisa.
 | --- | --- |
 | `PageHeader` | Título da tela, selo de contagem e ações (busca + botão principal) |
 | `SearchInput` | Campo de busca das listagens (use com `useValorAtrasado`) |
-| `DataTable` | Tabela de listagem; já trata carregando, erro, vazio e dados |
+| `DataTable` | Tabela de listagem; já trata carregando, erro, vazio e dados; rola por dentro com cabeçalho fixo |
 | `BotaoEditar`, `BotaoExcluir` | Ações da linha: lápis e lixeira vermelha |
 | `Pagination` | Rodapé "Página X de Y" com Anterior/Próxima |
 | `FormSheet`, `FormSheetBody`, `FormSheetFooter` | Painel lateral de cadastro e edição |

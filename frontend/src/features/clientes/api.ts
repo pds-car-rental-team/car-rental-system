@@ -2,7 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 
 import { apenasDigitos } from '@/lib/formatters'
 import { http } from '@/lib/http'
-import type { Pagina } from '@/lib/pagina'
+import { TAMANHO_PAGINA, type Pagina } from '@/lib/pagina'
 
 import type { ClienteFormValues } from './schema'
 
@@ -34,7 +34,7 @@ export function useClientes(filtro: FiltroClientes) {
   return useQuery({
     queryKey: chaves.lista(filtro),
     queryFn: ({ signal }) =>
-      http<Pagina<Cliente>>('/clientes', { params: { busca: filtro.busca, pagina: filtro.pagina }, signal }),
+      http<Pagina<Cliente>>('/clientes', { params: { busca: filtro.busca, pagina: filtro.pagina, tamanho: TAMANHO_PAGINA }, signal }),
     placeholderData: keepPreviousData,
   })
 }
