@@ -54,13 +54,14 @@ backend/src/main/java/br/com/carrental/
 
 frontend/src/
 ├── app/                     roteador, layout e páginas gerais
-├── components/ui/           componentes shadcn/ui (gerados, não editar à mão)
+├── components/              blocos do design system (PageHeader, DataTable, FormSheet…)
+│   └── ui/                  componentes base do shadcn/ui
 ├── features/
 │   └── clientes/            uma pasta por módulo
 │       ├── api.ts               chamadas HTTP + hooks do TanStack Query
 │       ├── schema.ts            validação do formulário (Zod)
-│       ├── components/          componentes do módulo
-│       └── pages/               telas (uma por rota)
+│       ├── components/          formulário e painel do módulo
+│       └── pages/               tela de listagem (uma rota por módulo)
 └── lib/                     código usado por mais de um módulo (http, formatadores)
 ```
 
@@ -86,6 +87,6 @@ Use o módulo de clientes como modelo e siga esta ordem. O exemplo é `veiculo`.
 2. **Backend**: no pacote `br.com.carrental.veiculo`, crie `Veiculo`, `VeiculoRepository`, `dto/VeiculoRequest`, `dto/VeiculoResponse`, `VeiculoService` e `VeiculoController` ([backend.md](backend.md), [api.md](api.md)).
 3. **Dados fictícios**: acrescente exemplos do módulo em `br.com.carrental.dev.DadosFicticios`, para os colegas terem o que ver na tela.
 4. **Testes do backend**: `VeiculoServiceTest` (unitário) e `VeiculoControllerIntegrationTest` ([testes.md](testes.md)).
-5. **Frontend**: em `frontend/src/features/veiculos`, crie `api.ts`, `schema.ts`, `components/` e `pages/` ([frontend.md](frontend.md)).
+5. **Frontend**: em `frontend/src/features/veiculos`, crie `api.ts`, `schema.ts`, `components/` e `pages/`, copiando a estrutura de clientes e usando os blocos do [design-system.md](design-system.md) ([frontend.md](frontend.md)).
 6. **Rotas e menu**: registre as rotas em `frontend/src/app/router.tsx` e o item de menu em `frontend/src/app/layout/AppLayout.tsx`.
 7. **Valide**: rode os comandos da seção "Antes de concluir" do `AGENTS.md`.

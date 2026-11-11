@@ -8,11 +8,14 @@ Referência: `frontend/src/features/clientes`.
 features/<modulo>/
 ├── api.ts          tipos da API, funções HTTP e hooks do TanStack Query
 ├── schema.ts       schema Zod do formulário e o tipo inferido
-├── components/     componentes usados só neste módulo
-└── pages/          uma tela por rota (<Algo>Page.tsx)
+├── components/     componentes usados só neste módulo (formulário e painel)
+└── pages/          a tela de listagem do módulo (<Modulo>Page.tsx)
 ```
 
 Rotas ficam em `src/app/router.tsx`; o menu, em `src/app/layout/AppLayout.tsx`.
+Cada módulo tem **uma rota**: cadastro, edição e exclusão acontecem em painel e diálogo sobre a listagem.
+
+> A aparência das telas é definida em [design-system.md](design-system.md). Leia-o antes de criar ou alterar qualquer tela.
 
 ## Regras
 
@@ -23,33 +26,31 @@ Rotas ficam em `src/app/router.tsx`; o menu, em `src/app/layout/AppLayout.tsx`.
 **Chamadas à API**
 - Sempre por `http()` de `@/lib/http`. Nunca use `fetch` ou `axios` direto em componente.
 - Sempre com TanStack Query: `useQuery` para ler, `useMutation` para gravar. Nunca `useEffect` + `useState` para buscar dados.
-- Cada feature exporta hooks (`useClientes`, `useCriarCliente`); componentes não conhecem URLs.
+- Cada feature exporta hooks (`useClientes`, `useSalvarCliente`); componentes não conhecem URLs.
 - Após gravar, invalide as consultas do módulo (`queryClient.invalidateQueries`).
 
 **Formulários**
 - React Hook Form + Zod (`zodResolver`). As regras do schema repetem as do `Request` do backend, com as mesmas mensagens.
+- Todo formulário abre no painel lateral (`FormSheet`), carregado sob demanda com `lazy()`. Não crie rota ou página para formulário.
 - Erros da API voltam para o formulário: erros de campo (`erro.errosDeCampo`) com `setError` no campo; demais, em `root`. Veja `ClienteForm.tsx`.
 - Máscaras e validações de documento ficam em `@/lib/formatters`. Para a API vai somente dígitos.
 
-**Interface**
-- Componentes vêm do shadcn/ui. Para adicionar um: `pnpm dlx shadcn@latest add <componente>`. Não edite `src/components/ui` à mão e não crie botão, input ou tabela próprios.
-- Estilo só com classes do Tailwind e com as cores do tema (`bg-primary`, `text-muted-foreground`, `text-destructive`). Não use cor fixa (`#fff`, `bg-blue-500`) nem arquivo CSS por componente.
-- Toda tela começa com `<PageHeader titulo="…">`.
+**Interface** (detalhes em [design-system.md](design-system.md))
+- Monte a tela com os blocos de `src/components/` (`PageHeader`, `SearchInput`, `DataTable`, `Pagination`, `FormSheet`, `ConfirmDialog`, `BotaoEditar`, `BotaoExcluir`). Não crie tabela, cabeçalho, modal ou botão de ação próprios.
+- Componentes base vêm do shadcn/ui (`src/components/ui`). Para adicionar um: `pnpm dlx shadcn@latest add <componente>`.
+- Estilo só com classes do Tailwind e com os tokens do tema (`bg-primary`, `text-muted-foreground`, `text-destructive`). Não use cor fixa (`#fff`, `bg-blue-500`) nem arquivo CSS por componente.
 - Ícones: `lucide-react`.
 
-**Estados de tela**: toda tela que busca dados trata os quatro casos:
-1. carregando (`Skeleton`);
-2. erro (mensagem com `mensagemDeErro(erro)` e opção de tentar de novo);
-3. vazio (texto explicando que não há registros);
-4. com dados.
+**Estados de tela**: toda tela que busca dados trata carregando, erro (com opção de tentar de novo), vazio e com dados.
+A `DataTable` já faz isso: passe `carregando`, `erro`, `aoTentarNovamente` e `vazio`.
 
 **Retorno ao usuário**
 - Sucesso de uma ação: `toast.success("…")`. Falha: mensagem no formulário ou `toast.error(mensagemDeErro(erro))`.
-- Ação destrutiva (excluir) sempre pede confirmação com `AlertDialog`.
+- Ação destrutiva (excluir) sempre pede confirmação com `ConfirmDialog`.
 
 **Acessibilidade**
 - Todo campo tem `label` ligado por `htmlFor`/`id`. Botão só com ícone tem `aria-label`.
-- A tela precisa funcionar em largura de celular: esconda colunas secundárias da tabela em telas pequenas, não crie rolagem horizontal.
+- A tela precisa funcionar em largura de celular: a página nunca rola na horizontal (a `DataTable` rola dentro da própria área).
 
 **Texto**
 - Tudo em português do Brasil. Botões dizem a ação ("Cadastrar cliente", "Salvar alterações"), não "OK"/"Enviar".

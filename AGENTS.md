@@ -17,6 +17,7 @@ Trabalho em grupo da disciplina Processos e Desenvolvimento de Software, com Scr
 | Endpoints | [docs/api.md](docs/api.md) |
 | Tabelas e migrations | [docs/banco-de-dados.md](docs/banco-de-dados.md) |
 | Código React | [docs/frontend.md](docs/frontend.md) |
+| Qualquer tela ou componente visual | [docs/design-system.md](docs/design-system.md) |
 | Entrada de dados, dados pessoais, configuração | [docs/seguranca.md](docs/seguranca.md) |
 | Consultas e listagens | [docs/performance.md](docs/performance.md) |
 | Testes | [docs/testes.md](docs/testes.md) |
@@ -69,8 +70,10 @@ Requisitos: JDK 21 ou mais novo, Node 24 (ver `.nvmrc`), pnpm e Docker. Não é 
 
 **Frontend**
 - API somente por `@/lib/http` + hooks do TanStack Query definidos em `features/<modulo>/api.ts`.
-- Formulários com React Hook Form + Zod; componentes de UI do shadcn/ui; estilo só com Tailwind e cores do tema.
-- Toda tela trata carregando, erro, vazio e com dados.
+- **Design system obrigatório** ([docs/design-system.md](docs/design-system.md)): telas montadas com os blocos de `src/components/` (`PageHeader`, `DataTable`, `FormSheet`, `ConfirmDialog`…), copiando a estrutura de `ClientesPage`. Nunca crie visual próprio.
+- Cores, fontes e raios só pelos tokens de `src/index.css` (`bg-primary`, `text-destructive`…). Proibido cor fixa (`#hex`, `bg-orange-600`).
+- Uma rota por módulo: cadastro e edição no painel lateral (`FormSheet`, com `lazy()`), exclusão pela lixeira vermelha + `ConfirmDialog`.
+- Formulários com React Hook Form + Zod. A `DataTable` já trata carregando, erro, vazio e com dados.
 - TypeScript sem `any`.
 
 **Geral**
@@ -92,6 +95,7 @@ Confira também:
 - [ ] O código novo segue a estrutura do módulo de clientes e os documentos de `docs/`.
 - [ ] Endpoints novos aparecem no Swagger com `@Tag`/`@Operation`.
 - [ ] Rotas e item de menu registrados, se houver tela nova.
+- [ ] Tela nova usa só blocos e tokens do design system, sem cor fixa nem componente visual duplicado.
 - [ ] Nenhum segredo, `.env` ou arquivo gerado (`target/`, `node_modules/`, `dist/`) incluído.
 - [ ] `docs/` atualizado se algum padrão mudou.
 

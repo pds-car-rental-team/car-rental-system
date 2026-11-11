@@ -11,6 +11,7 @@ Antes de escrever código, leia o documento da área em que vai mexer.
 | [api.md](api.md) | criar ou alterar um endpoint |
 | [banco-de-dados.md](banco-de-dados.md) | criar tabela, coluna, índice ou migration |
 | [frontend.md](frontend.md) | escrever React (telas, formulários, chamadas à API) |
+| [design-system.md](design-system.md) | criar ou alterar qualquer tela (cores, componentes, padrões visuais) |
 | [seguranca.md](seguranca.md) | lidar com entrada do usuário, dados pessoais, configuração |
 | [performance.md](performance.md) | escrever consultas, listagens ou telas com muitos dados |
 | [testes.md](testes.md) | escrever ou rodar testes |
