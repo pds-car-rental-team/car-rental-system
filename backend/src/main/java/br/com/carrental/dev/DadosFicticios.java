@@ -27,10 +27,7 @@ public class DadosFicticios {
     private static final List<String> NOMES = List.of(
             "Ana Beatriz Carvalho", "Bruno Henrique Almeida", "Camila Ferreira Lopes", "Daniel Rocha Martins",
             "Eduarda Nogueira Pires", "Felipe Augusto Barros", "Gabriela Monteiro Dias", "Heitor Cardoso Lima",
-            "Isabela Teixeira Ramos", "João Pedro Vasconcelos", "Karina Duarte Moreira", "Leonardo Batista Cunha",
-            "Mariana Azevedo Santos", "Nicolas Freitas Araújo", "Olívia Rezende Campos", "Paulo Sérgio Guimarães",
-            "Rafaela Mendes Correia", "Samuel Oliveira Prado", "Tatiane Borges Farias", "Ulisses Andrade Pinto",
-            "Valentina Ribeiro Costa", "William Souza Tavares", "Yasmin Castro Miranda", "Zeca Moura Fonseca");
+            "Isabela Teixeira Ramos", "João Pedro Vasconcelos", "Karina Duarte Moreira", "Leonardo Batista Cunha");
 
     @Bean
     ApplicationRunner popularClientes(ClienteRepository repository) {
