@@ -2,8 +2,9 @@
 
 ## Branches
 
-- `main` é a branch estável. **Ninguém faz commit direto na `main`**: todo código entra por pull request.
-- Uma branch por história do Jira, criada a partir da `main` atualizada:
+- `main` é a branch estável: o que está nela precisa rodar e passar nos testes.
+- O caminho recomendado é uma branch por história do Jira, criada a partir da `main` atualizada, e pull request para revisão. Commit direto na `main` é permitido quando o grupo combinar, desde que as validações do `AGENTS.md` tenham passado.
+- Nome das branches:
 
 ```
 feat/SCRUM-11-cadastro-clientes

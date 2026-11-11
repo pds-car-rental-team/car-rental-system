@@ -101,6 +101,6 @@ Confira também:
 
 ## Git
 
-- Nunca faça commit direto na `main`. Branch por história: `feat/SCRUM-<n>-descricao`.
+- Prefira uma branch por história (`feat/SCRUM-<n>-descricao`). Commit direto na `main` só quando a pessoa pedir.
 - Commits em português, Conventional Commits, com a chave do Jira: `feat(clientes): bloquear CPF duplicado (SCRUM-22)`.
 - Não faça commit, push, force push ou reescrita de histórico sem a pessoa pedir.
