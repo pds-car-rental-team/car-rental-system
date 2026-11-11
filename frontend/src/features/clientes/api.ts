@@ -24,7 +24,6 @@ interface FiltroClientes {
 const chaves = {
   todos: ['clientes'] as const,
   lista: (filtro: FiltroClientes) => ['clientes', 'lista', filtro] as const,
-  detalhe: (id: number) => ['clientes', 'detalhe', id] as const,
 }
 
 function paraRequest(valores: ClienteFormValues) {
@@ -40,27 +39,14 @@ export function useClientes(filtro: FiltroClientes) {
   })
 }
 
-export function useCliente(id: number) {
-  return useQuery({
-    queryKey: chaves.detalhe(id),
-    queryFn: ({ signal }) => http<Cliente>(`/clientes/${id}`, { signal }),
-  })
-}
-
-export function useCriarCliente() {
+/** Cadastra (sem `id`) ou atualiza (com `id`) um cliente. */
+export function useSalvarCliente() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (valores: ClienteFormValues) =>
-      http<Cliente>('/clientes', { method: 'POST', body: paraRequest(valores) }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: chaves.todos }),
-  })
-}
-
-export function useAtualizarCliente(id: number) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (valores: ClienteFormValues) =>
-      http<Cliente>(`/clientes/${id}`, { method: 'PUT', body: paraRequest(valores) }),
+    mutationFn: ({ id, valores }: { id?: number; valores: ClienteFormValues }) =>
+      id === undefined
+        ? http<Cliente>('/clientes', { method: 'POST', body: paraRequest(valores) })
+        : http<Cliente>(`/clientes/${id}`, { method: 'PUT', body: paraRequest(valores) }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: chaves.todos }),
   })
 }

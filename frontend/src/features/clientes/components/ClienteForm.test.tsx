@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ApiError } from '@/lib/http'
@@ -8,11 +7,7 @@ import { ApiError } from '@/lib/http'
 import { ClienteForm } from './ClienteForm'
 
 function renderizar(onSubmit = vi.fn().mockResolvedValue(undefined)) {
-  render(
-    <MemoryRouter>
-      <ClienteForm rotuloEnviar="Cadastrar" onSubmit={onSubmit} />
-    </MemoryRouter>,
-  )
+  render(<ClienteForm rotuloEnviar="Cadastrar" onSubmit={onSubmit} onCancel={vi.fn()} />)
   return onSubmit
 }
 

@@ -1,9 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router'
 
-import { Button } from '@/components/ui/button'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { FormSheetBody, FormSheetFooter } from '@/components/FormSheet'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { formatarCpf, formatarTelefone } from '@/lib/formatters'
 import { ApiError, mensagemDeErro } from '@/lib/http'
@@ -17,9 +16,10 @@ interface Props {
   rotuloEnviar: string
   /** Deve rejeitar com o erro da API para que o formulário o exiba. */
   onSubmit: (valores: ClienteFormValues) => Promise<unknown>
+  onCancel: () => void
 }
 
-export function ClienteForm({ valoresIniciais = VAZIO, rotuloEnviar, onSubmit }: Props) {
+export function ClienteForm({ valoresIniciais = VAZIO, rotuloEnviar, onSubmit, onCancel }: Props) {
   const {
     register,
     handleSubmit,
@@ -45,46 +45,44 @@ export function ClienteForm({ valoresIniciais = VAZIO, rotuloEnviar, onSubmit }:
   })
 
   return (
-    <form onSubmit={enviar} noValidate>
-      <FieldGroup>
+    <form onSubmit={enviar} noValidate className="flex min-h-0 flex-1 flex-col">
+      <FormSheetBody>
         <Field data-invalid={!!errors.nome}>
           <FieldLabel htmlFor="nome">Nome completo</FieldLabel>
           <Input id="nome" autoComplete="off" aria-invalid={!!errors.nome} {...register('nome')} />
           <FieldError errors={[errors.nome]} />
         </Field>
 
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Field data-invalid={!!errors.cpf}>
-            <FieldLabel htmlFor="cpf">CPF</FieldLabel>
-            <Input
-              id="cpf"
-              inputMode="numeric"
-              placeholder="000.000.000-00"
-              autoComplete="off"
-              aria-invalid={!!errors.cpf}
-              {...register('cpf', {
-                onChange: (evento) => setValue('cpf', formatarCpf(evento.target.value)),
-              })}
-            />
-            <FieldError errors={[errors.cpf]} />
-          </Field>
+        <Field data-invalid={!!errors.cpf}>
+          <FieldLabel htmlFor="cpf">CPF</FieldLabel>
+          <Input
+            id="cpf"
+            inputMode="numeric"
+            placeholder="000.000.000-00"
+            autoComplete="off"
+            aria-invalid={!!errors.cpf}
+            {...register('cpf', {
+              onChange: (evento) => setValue('cpf', formatarCpf(evento.target.value)),
+            })}
+          />
+          <FieldError errors={[errors.cpf]} />
+        </Field>
 
-          <Field data-invalid={!!errors.telefone}>
-            <FieldLabel htmlFor="telefone">Telefone</FieldLabel>
-            <Input
-              id="telefone"
-              type="tel"
-              inputMode="numeric"
-              placeholder="(00) 00000-0000"
-              autoComplete="off"
-              aria-invalid={!!errors.telefone}
-              {...register('telefone', {
-                onChange: (evento) => setValue('telefone', formatarTelefone(evento.target.value)),
-              })}
-            />
-            <FieldError errors={[errors.telefone]} />
-          </Field>
-        </div>
+        <Field data-invalid={!!errors.telefone}>
+          <FieldLabel htmlFor="telefone">Telefone</FieldLabel>
+          <Input
+            id="telefone"
+            type="tel"
+            inputMode="numeric"
+            placeholder="(00) 00000-0000"
+            autoComplete="off"
+            aria-invalid={!!errors.telefone}
+            {...register('telefone', {
+              onChange: (evento) => setValue('telefone', formatarTelefone(evento.target.value)),
+            })}
+          />
+          <FieldError errors={[errors.telefone]} />
+        </Field>
 
         <Field data-invalid={!!errors.email}>
           <FieldLabel htmlFor="email">E-mail</FieldLabel>
@@ -93,20 +91,13 @@ export function ClienteForm({ valoresIniciais = VAZIO, rotuloEnviar, onSubmit }:
         </Field>
 
         {errors.root && (
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="font-medium text-destructive">
             {errors.root.message}
           </p>
         )}
+      </FormSheetBody>
 
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="outline" asChild>
-            <Link to="/clientes">Cancelar</Link>
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando…' : rotuloEnviar}
-          </Button>
-        </div>
-      </FieldGroup>
+      <FormSheetFooter rotuloEnviar={rotuloEnviar} enviando={isSubmitting} aoCancelar={onCancel} />
     </form>
   )
 }
