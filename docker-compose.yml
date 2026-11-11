@@ -1,0 +1,24 @@
+# Banco de dados de desenvolvimento. Uso: docker compose up -d
+# As credenciais abaixo são exclusivas do ambiente local e nunca devem ser reutilizadas.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: car-rental-postgres
+    environment:
+      POSTGRES_DB: car_rental
+      POSTGRES_USER: car_rental
+      POSTGRES_PASSWORD: car_rental
+    ports:
+      # Somente na própria máquina: o banco não fica exposto na rede.
+      # Se a porta 5432 já estiver em uso, defina DB_PORT (veja docs/configuracao.md).
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U car_rental -d car_rental"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:
