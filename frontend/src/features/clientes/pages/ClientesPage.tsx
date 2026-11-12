@@ -20,9 +20,9 @@ const ClienteFormModal = lazy(() => import('../components/ClienteFormModal'))
 
 const COLUNAS: Coluna<Cliente>[] = [
   { cabecalho: 'Nome', celula: (c) => c.nome, principal: true },
-  { cabecalho: 'CPF', celula: (c) => formatarCpf(c.cpf), numerica: true },
+  { cabecalho: 'CPF', celula: (c) => formatarCpf(c.cpf), numerica: true, largura: 'w-44' },
   { cabecalho: 'E-mail', celula: (c) => c.email },
-  { cabecalho: 'Telefone', celula: (c) => formatarTelefone(c.telefone), numerica: true },
+  { cabecalho: 'Telefone', celula: (c) => formatarTelefone(c.telefone), numerica: true, largura: 'w-44' },
 ]
 
 /** `sessao` muda a cada abertura para o formulário sempre começar limpo. */

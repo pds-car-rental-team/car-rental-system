@@ -12,7 +12,7 @@ interface Props {
 /** Campo de busca padrão das listagens. Use junto com `useValorAtrasado` para não chamar a API a cada tecla. */
 export function SearchInput({ rotulo, valor, aoMudar }: Props) {
   return (
-    <div className="relative max-w-[21rem] flex-1 basis-52">
+    <div className="relative w-full sm:w-80">
       <SearchIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="search"

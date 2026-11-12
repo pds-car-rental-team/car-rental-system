@@ -12,6 +12,8 @@ export interface Coluna<T> {
   principal?: boolean
   /** Valores numéricos (CPF, telefone, dinheiro): alinha os dígitos. */
   numerica?: boolean
+  /** Classe de largura fixa, ex.: `w-40`. Sem ela, a coluna divide o espaço que sobrar. */
+  largura?: string
 }
 
 interface Props<T> {
@@ -31,21 +33,22 @@ interface Props<T> {
  * Tabela padrão das listagens. Já trata os quatro estados obrigatórios:
  * carregando, erro (com "Tentar novamente"), vazio e com dados.
  * Ocupa a altura que sobra na tela e rola por dentro, com o cabeçalho fixo.
+ * As colunas têm largura estável (`table-fixed`): não mudam de lugar quando os dados mudam.
  */
 export function DataTable<T>({ colunas, dados, chave, carregando, erro, aoTentarNovamente, vazio, acoes }: Props<T>) {
   const totalColunas = colunas.length + (acoes ? 1 : 0)
 
   return (
     <div className="min-h-60 flex-1 overflow-auto">
-      <table className="w-full min-w-[47rem] border-separate border-spacing-0 text-left [&_td]:border-b [&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:border-b-2 [&_th]:border-foreground [&_th]:bg-background">
+      <table className="w-full min-w-[52rem] table-fixed border-separate border-spacing-0 text-left [&_td]:border-b [&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:border-b-2 [&_th]:border-foreground [&_th]:bg-background">
         <thead>
           <tr className="text-xs tracking-[0.06em] text-muted-foreground uppercase">
             {colunas.map((coluna, i) => (
-              <th key={coluna.cabecalho} className={cn('h-10 px-3 font-semibold', i === 0 && 'pl-0')}>
+              <th key={coluna.cabecalho} className={cn('h-10 px-3 font-semibold', i === 0 && 'pl-0', coluna.largura)}>
                 {coluna.cabecalho}
               </th>
             ))}
-            {acoes && <th className="h-10 text-right font-semibold">Ações</th>}
+            {acoes && <th className="h-10 w-24 text-right font-semibold">Ações</th>}
           </tr>
         </thead>
         <tbody>

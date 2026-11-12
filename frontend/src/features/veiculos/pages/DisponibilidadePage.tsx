@@ -16,23 +16,18 @@ import {
 } from '../api'
 import { ResumoDisponibilidadeCards } from '../components/ResumoDisponibilidadeCards'
 import { SituacaoVeiculoBadge } from '../components/SituacaoVeiculoBadge'
-import { formatarMoeda, formatarPlaca, ROTULO_CATEGORIA, ROTULO_SITUACAO } from '../formatters'
+import { formatarMoeda, formatarPlaca, ROTULO_CATEGORIA } from '../formatters'
 
 const CATEGORIAS = (Object.keys(ROTULO_CATEGORIA) as CategoriaVeiculo[]).map((valor) => ({
   valor,
   rotulo: ROTULO_CATEGORIA[valor],
 }))
-const SITUACOES = (Object.keys(ROTULO_SITUACAO) as SituacaoVeiculo[]).map((valor) => ({
-  valor,
-  rotulo: ROTULO_SITUACAO[valor],
-}))
-
 const COLUNAS: Coluna<Veiculo>[] = [
   { cabecalho: 'Modelo', celula: (v) => v.modelo, principal: true },
-  { cabecalho: 'Placa', celula: (v) => formatarPlaca(v.placa), numerica: true },
-  { cabecalho: 'Categoria', celula: (v) => ROTULO_CATEGORIA[v.categoria] },
-  { cabecalho: 'Diária', celula: (v) => formatarMoeda(v.valorDiaria), numerica: true },
-  { cabecalho: 'Situação', celula: (v) => <SituacaoVeiculoBadge situacao={v.situacao} /> },
+  { cabecalho: 'Placa', celula: (v) => formatarPlaca(v.placa), numerica: true, largura: 'w-36' },
+  { cabecalho: 'Categoria', celula: (v) => ROTULO_CATEGORIA[v.categoria], largura: 'w-40' },
+  { cabecalho: 'Diária', celula: (v) => formatarMoeda(v.valorDiaria), numerica: true, largura: 'w-36' },
+  { cabecalho: 'Situação', celula: (v) => <SituacaoVeiculoBadge situacao={v.situacao} />, largura: 'w-44' },
 ]
 
 export function DisponibilidadePage() {
@@ -76,18 +71,9 @@ export function DisponibilidadePage() {
             setPagina(0)
           }}
         />
-        <FilterSelect
-          rotulo="Filtrar por situação"
-          rotuloTodos="Todas as situações"
-          opcoes={SITUACOES}
-          valor={situacao}
-          aoMudar={(valor) => {
-            setSituacao(valor)
-            setPagina(0)
-          }}
-        />
       </PageHeader>
 
+      {/* Os cards são o filtro de situação: clicar em um deles filtra a lista. */}
       <ResumoDisponibilidadeCards
         resumo={resumoQuery.data}
         carregando={resumoQuery.isPending}
