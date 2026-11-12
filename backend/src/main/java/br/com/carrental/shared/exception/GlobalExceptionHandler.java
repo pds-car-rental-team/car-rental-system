@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
@@ -59,5 +61,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 "Um ou mais campos são inválidos.");
         problema.setProperty("erros", erros);
         return ResponseEntity.badRequest().body(problema);
+    }
+
+    /** Parâmetro de URL com valor que não converte para o tipo esperado, ex.: {@code ?situacao=XYZ}. */
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
+        String detalhe = ex instanceof MethodArgumentTypeMismatchException parametro
+                ? "Valor inválido para o parâmetro '" + parametro.getName() + "'."
+                : "Valor inválido na requisição.";
+        return ResponseEntity.badRequest().body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detalhe));
     }
 }

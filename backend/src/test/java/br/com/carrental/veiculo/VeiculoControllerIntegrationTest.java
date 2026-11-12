@@ -146,6 +146,17 @@ class VeiculoControllerIntegrationTest {
     }
 
     @Test
+    void rejeitaFiltroComValorInexistente() throws Exception {
+        mvc.perform(get("/api/v1/veiculos").param("situacao", "XYZ"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Valor inválido para o parâmetro 'situacao'."));
+
+        mvc.perform(get("/api/v1/veiculos/disponibilidade").param("categoria", "abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Valor inválido para o parâmetro 'categoria'."));
+    }
+
+    @Test
     void bloqueiaPlacaDuplicadaERejeitaDadosInvalidos() throws Exception {
         cadastrar(PULSE_DISPONIVEL);
 

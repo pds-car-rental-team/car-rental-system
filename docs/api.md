@@ -67,7 +67,7 @@ Erro de validação (400) traz também a lista de campos:
 
 | Status | Quando |
 | --- | --- |
-| 400 | Dados inválidos (Bean Validation, JSON malformado) |
+| 400 | Dados inválidos (Bean Validation, JSON malformado, parâmetro de filtro com valor inexistente) |
 | 404 | Recurso não existe |
 | 409 | Duplicidade ou estado que impede a operação |
 | 500 | Erro inesperado (mensagem genérica; detalhes só no log) |
