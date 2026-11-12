@@ -218,5 +218,22 @@ class VeiculoServiceTest {
 
         verify(repository).delete(veiculo);
     }
+
+    @Test
+    void atualizarInexistenteLancaNaoEncontrado() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.atualizar(99L, requestValido()))
+            .isInstanceOf(RecursoNaoEncontradoException.class);
+    }
+
+    @Test
+    void excluirInexistenteLancaNaoEncontrado() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.excluir(99L))
+            .isInstanceOf(RecursoNaoEncontradoException.class);
+        verify(repository, never()).delete(any());
+    }
 }
 
