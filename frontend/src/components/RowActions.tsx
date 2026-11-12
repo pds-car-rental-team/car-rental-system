@@ -1,5 +1,6 @@
 import { PencilIcon, Trash2Icon } from 'lucide-react'
 
+import { Tooltip } from '@/components/Tooltip'
 import { Button } from '@/components/ui/button'
 
 interface Props {
@@ -11,24 +12,33 @@ interface Props {
 /** Ação de editar da linha de uma tabela: sempre o ícone de lápis. */
 export function BotaoEditar({ rotulo, onClick }: Props) {
   return (
-    <Button variant="ghost" size="icon" aria-label={rotulo} title="Editar" onClick={onClick}>
-      <PencilIcon />
-    </Button>
+    <Tooltip texto="Editar">
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label={rotulo}
+        className="hover:bg-foreground/10"
+        onClick={onClick}
+      >
+        <PencilIcon />
+      </Button>
+    </Tooltip>
   )
 }
 
 /** Ação de excluir da linha de uma tabela: sempre a lixeira vermelha (ação destrutiva). */
 export function BotaoExcluir({ rotulo, onClick }: Props) {
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label={rotulo}
-      title="Excluir"
-      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-      onClick={onClick}
-    >
-      <Trash2Icon />
-    </Button>
+    <Tooltip texto="Excluir">
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label={rotulo}
+        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+        onClick={onClick}
+      >
+        <Trash2Icon />
+      </Button>
+    </Tooltip>
   )
 }
