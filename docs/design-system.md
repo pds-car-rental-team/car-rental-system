@@ -6,7 +6,7 @@ A tela de referência é `frontend/src/features/clientes/pages/ClientesPage.tsx`
 
 ## Princípios
 
-1. **Uma tela por módulo.** Cada módulo tem uma página de listagem. Cadastrar, editar e excluir acontecem **sobre a listagem** (modal e diálogo de confirmação), nunca em outra página ou rota.
+1. **Uma tela por módulo.** Cada módulo tem uma página de listagem. Cadastrar, editar e excluir acontecem **sobre a listagem** (modal e diálogo de confirmação), nunca em outra página ou rota. Uma tela só de consulta pedida por uma história (ex.: Disponibilidade da frota) pode ter rota própria, dentro da pasta do mesmo módulo (`features/veiculos`).
 2. **Monte, não estilize.** Uma tela é a combinação dos blocos prontos. Se você está escrevendo muitas classes de cor, borda e espaçamento em uma página, está fazendo errado.
 3. **Laranja é ação, vermelho é perigo.** O laranja marca a ação principal da tela (uma por tela). Vermelho aparece só em exclusão e erro.
 4. **A página não rola.** A tela ocupa exatamente a altura da janela. Se a lista não couber, quem rola é a área da tabela (com o cabeçalho fixo), nunca a página. Listagens trazem 20 registros por página (`TAMANHO_PAGINA`).
@@ -30,7 +30,7 @@ Definidos em um único lugar: `frontend/src/index.css` (bloco `:root`). Mudar um
 | `--destructive` | `text-destructive`, `bg-destructive` | Excluir e mensagens de erro |
 | `--status-available*` | `bg-status-available text-status-available-foreground` | Selo e destaque de veículo disponível |
 | `--status-rented*` | `bg-status-rented text-status-rented-foreground` | Selo e destaque de veículo alugado |
-| `--status-maintenance*` | `bg-status-maintenance text-status-maintenance-foreground` | Selo e destaque de veículo em manutenção |
+| `--status-maintenance*` | `bg-status-maintenance text-status-maintenance-foreground` | Selo e destaque de veículo em manutenção (cinza: vermelho fica reservado a excluir e erro) |
 | `--border` | `border` | Divisórias e linhas de tabela |
 | `--input` | `border-input` | Borda de campos |
 | `--header*` | `bg-header`, `text-header-foreground`… | Barra superior |
@@ -60,8 +60,9 @@ Ficam em `frontend/src/components/`. Use estes antes de criar qualquer coisa.
 
 | Bloco | Para quê |
 | --- | --- |
-| `PageHeader` | Título da tela, selo de contagem e ações (busca + botão principal) |
+| `PageHeader` | Título da tela, selo de contagem e ações (busca, filtros e botão principal) |
 | `SearchInput` | Campo de busca das listagens (use com `useValorAtrasado`) |
+| `FilterSelect` | Filtro por opção fixa (situação, categoria…), ao lado do `SearchInput`. Nunca escreva `<select>` direto na página |
 | `DataTable` | Tabela de listagem; já trata carregando, erro, vazio e dados; rola por dentro com cabeçalho fixo |
 | `BotaoEditar`, `BotaoExcluir` | Ações da linha: lápis e lixeira vermelha |
 | `Pagination` | Rodapé "Página X de Y" com Anterior/Próxima |

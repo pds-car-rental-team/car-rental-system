@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 
 import { ClientesPage } from '@/features/clientes/pages/ClientesPage'
-import { DisponibilidadePage } from '@/features/disponibilidade/pages/DisponibilidadePage'
+import { DisponibilidadePage } from '@/features/veiculos/pages/DisponibilidadePage'
 
 import { AppLayout } from './layout/AppLayout'
 import { NotFoundPage } from './pages/NotFoundPage'

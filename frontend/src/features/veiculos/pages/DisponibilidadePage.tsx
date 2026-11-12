@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { DataTable, type Coluna } from '@/components/DataTable'
+import { FilterSelect } from '@/components/FilterSelect'
 import { PageHeader } from '@/components/PageHeader'
 import { Pagination } from '@/components/Pagination'
 import { SearchInput } from '@/components/SearchInput'
@@ -17,8 +18,14 @@ import { ResumoDisponibilidadeCards } from '../components/ResumoDisponibilidadeC
 import { SituacaoVeiculoBadge } from '../components/SituacaoVeiculoBadge'
 import { formatarMoeda, formatarPlaca, ROTULO_CATEGORIA, ROTULO_SITUACAO } from '../formatters'
 
-const CATEGORIAS: CategoriaVeiculo[] = ['ECONOMICO', 'HATCH', 'SEDAN', 'SUV', 'UTILITARIO']
-const SITUACOES: SituacaoVeiculo[] = ['DISPONIVEL', 'ALUGADO', 'EM_MANUTENCAO']
+const CATEGORIAS = (Object.keys(ROTULO_CATEGORIA) as CategoriaVeiculo[]).map((valor) => ({
+  valor,
+  rotulo: ROTULO_CATEGORIA[valor],
+}))
+const SITUACOES = (Object.keys(ROTULO_SITUACAO) as SituacaoVeiculo[]).map((valor) => ({
+  valor,
+  rotulo: ROTULO_SITUACAO[valor],
+}))
 
 const COLUNAS: Coluna<Veiculo>[] = [
   { cabecalho: 'Modelo', celula: (v) => v.modelo, principal: true },
@@ -59,41 +66,26 @@ export function DisponibilidadePage() {
           }}
         />
 
-        <select
-          aria-label="Filtrar por categoria"
-          value={categoria ?? ''}
-          onChange={(evento) => {
-            const valor = evento.target.value
-            setCategoria(valor ? (valor as CategoriaVeiculo) : undefined)
+        <FilterSelect
+          rotulo="Filtrar por categoria"
+          rotuloTodos="Todas as categorias"
+          opcoes={CATEGORIAS}
+          valor={categoria}
+          aoMudar={(valor) => {
+            setCategoria(valor)
             setPagina(0)
           }}
-          className="h-11 rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
-        >
-          <option value="">Todas as categorias</option>
-          {CATEGORIAS.map((item) => (
-            <option key={item} value={item}>
-              {ROTULO_CATEGORIA[item]}
-            </option>
-          ))}
-        </select>
-
-        <select
-          aria-label="Filtrar por situação"
-          value={situacao ?? ''}
-          onChange={(evento) => {
-            const valor = evento.target.value
-            setSituacao(valor ? (valor as SituacaoVeiculo) : undefined)
+        />
+        <FilterSelect
+          rotulo="Filtrar por situação"
+          rotuloTodos="Todas as situações"
+          opcoes={SITUACOES}
+          valor={situacao}
+          aoMudar={(valor) => {
+            setSituacao(valor)
             setPagina(0)
           }}
-          className="h-11 rounded-lg border border-input bg-card px-3.5 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
-        >
-          <option value="">Todas as situações</option>
-          {SITUACOES.map((item) => (
-            <option key={item} value={item}>
-              {ROTULO_SITUACAO[item]}
-            </option>
-          ))}
-        </select>
+        />
       </PageHeader>
 
       <ResumoDisponibilidadeCards

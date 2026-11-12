@@ -39,10 +39,10 @@
     --destructive: #b91c1c;         /* vermelho: excluir e erros */
     --status-available: #dcfce7;    /* verde claro: veículo disponível */
     --status-available-foreground: #166534;
-    --status-rented: #ffedd5;       /* âmbar claro: veículo alugado */
+    --status-rented: #ffedd5;       /* laranja claro: veículo alugado */
     --status-rented-foreground: #9a3412;
-    --status-maintenance: #fee2e2;  /* vermelho claro: veículo em manutenção */
-    --status-maintenance-foreground: #991b1b;
+    --status-maintenance: #e7e5e4;  /* cinza: veículo em manutenção (vermelho é só para excluir e erro) */
+    --status-maintenance-foreground: #44403c;
     --border: #e7e5e4;
     --input: #d6d3d1;
     --ring: #fb923c;
