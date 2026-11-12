@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 /** Cada novo módulo (veículos, locações...) entra no menu adicionando um item aqui. */
 const MENU = [
   { rotulo: 'Clientes', para: '/clientes' },
+  { rotulo: 'Veículos', para: '/veiculos' },
   { rotulo: 'Disponibilidade', para: '/disponibilidade' },
 ]
 

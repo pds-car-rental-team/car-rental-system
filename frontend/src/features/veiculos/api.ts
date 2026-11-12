@@ -1,7 +1,9 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { http } from '@/lib/http'
 import { TAMANHO_PAGINA, type Pagina } from '@/lib/pagina'
+import type { VeiculoFormValues } from './schema'
+import { lerValor } from './schema'
 
 export type SituacaoVeiculo = 'DISPONIVEL' | 'ALUGADO' | 'EM_MANUTENCAO'
 
@@ -65,6 +67,53 @@ export function useResumoDisponibilidade(categoria?: CategoriaVeiculo) {
         signal,
       }),
     placeholderData: keepPreviousData,
+  })
+}
+
+export interface FiltroVeiculos {
+  busca: string
+  pagina: number
+}
+
+function paraRequest(valores: VeiculoFormValues) {
+  return {
+    placa: valores.placa.trim(),
+    modelo: valores.modelo.trim(),
+    categoria: valores.categoria as CategoriaVeiculo,
+    valorDiaria: lerValor(valores.valorDiaria),
+    situacao: valores.situacao as SituacaoVeiculo,
+  }
+}
+
+export function useVeiculos(filtro: FiltroVeiculos) {
+  return useQuery({
+    queryKey: ['veiculos', 'lista', filtro] as const,
+    queryFn: ({ signal }) =>
+      http<Pagina<Veiculo>>('/veiculos', {
+        params: { busca: filtro.busca, pagina: filtro.pagina, tamanho: TAMANHO_PAGINA },
+        signal,
+      }),
+    placeholderData: keepPreviousData,
+  })
+}
+
+/** Cadastra (sem `id`) ou atualiza (com `id`) um veículo. */
+export function useSalvarVeiculo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, valores }: { id?: number; valores: VeiculoFormValues }) =>
+      id === undefined
+        ? http<Veiculo>('/veiculos', { method: 'POST', body: paraRequest(valores) })
+        : http<Veiculo>(`/veiculos/${id}`, { method: 'PUT', body: paraRequest(valores) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: chaves.todos }),
+  })
+}
+
+export function useExcluirVeiculo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => http<void>(`/veiculos/${id}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: chaves.todos }),
   })
 }
 

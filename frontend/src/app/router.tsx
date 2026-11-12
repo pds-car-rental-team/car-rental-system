@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router'
 
 import { ClientesPage } from '@/features/clientes/pages/ClientesPage'
 import { DisponibilidadePage } from '@/features/veiculos/pages/DisponibilidadePage'
+import { VeiculosPage } from '@/features/veiculos/pages/VeiculosPage'
 
 import { AppLayout } from './layout/AppLayout'
 import { NotFoundPage } from './pages/NotFoundPage'
@@ -17,6 +18,7 @@ export const router = createBrowserRouter([
       // Enquanto o painel de indicadores não existe, a página inicial é a de clientes.
       { index: true, element: <Navigate to="/clientes" replace /> },
       { path: 'clientes', element: <ClientesPage /> },
+      { path: 'veiculos', element: <VeiculosPage /> },
       { path: 'disponibilidade', element: <DisponibilidadePage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
