@@ -28,6 +28,9 @@ Definidos em um único lugar: `frontend/src/index.css` (bloco `:root`). Mudar um
 | `--primary` | `bg-primary`, `text-primary` | Laranja da marca: botão principal |
 | `--accent` / `--accent-foreground` | `bg-accent text-accent-foreground` | Selos e destaques suaves |
 | `--destructive` | `text-destructive`, `bg-destructive` | Excluir e mensagens de erro |
+| `--status-available*` | `bg-status-available text-status-available-foreground` | Selo e destaque de veículo disponível |
+| `--status-rented*` | `bg-status-rented text-status-rented-foreground` | Selo e destaque de veículo alugado |
+| `--status-maintenance*` | `bg-status-maintenance text-status-maintenance-foreground` | Selo e destaque de veículo em manutenção |
 | `--border` | `border` | Divisórias e linhas de tabela |
 | `--input` | `border-input` | Borda de campos |
 | `--header*` | `bg-header`, `text-header-foreground`… | Barra superior |

@@ -37,6 +37,12 @@
 
     /* Estados */
     --destructive: #b91c1c;         /* vermelho: excluir e erros */
+    --status-available: #dcfce7;    /* verde claro: veículo disponível */
+    --status-available-foreground: #166534;
+    --status-rented: #ffedd5;       /* âmbar claro: veículo alugado */
+    --status-rented-foreground: #9a3412;
+    --status-maintenance: #fee2e2;  /* vermelho claro: veículo em manutenção */
+    --status-maintenance-foreground: #991b1b;
     --border: #e7e5e4;
     --input: #d6d3d1;
     --ring: #fb923c;
@@ -66,6 +72,12 @@
     --color-header-muted: var(--header-muted);
     --color-header-accent: var(--header-accent);
     --color-destructive: var(--destructive);
+    --color-status-available: var(--status-available);
+    --color-status-available-foreground: var(--status-available-foreground);
+    --color-status-rented: var(--status-rented);
+    --color-status-rented-foreground: var(--status-rented-foreground);
+    --color-status-maintenance: var(--status-maintenance);
+    --color-status-maintenance-foreground: var(--status-maintenance-foreground);
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
