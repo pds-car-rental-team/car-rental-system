@@ -4,7 +4,10 @@ import { NavLink, Outlet } from 'react-router'
 import { cn } from '@/lib/utils'
 
 /** Cada novo módulo (veículos, locações...) entra no menu adicionando um item aqui. */
-const MENU = [{ rotulo: 'Clientes', para: '/clientes' }]
+const MENU = [
+  { rotulo: 'Clientes', para: '/clientes' },
+  { rotulo: 'Disponibilidade', para: '/disponibilidade' },
+]
 
 export function AppLayout() {
   return (
