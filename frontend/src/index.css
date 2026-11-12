@@ -5,6 +5,12 @@
 @import "@fontsource-variable/sora";
 
 /*
+ * O sistema tem um tema só (claro). Sem esta linha, as classes `dark:` dos componentes base
+ * seriam ativadas pelo modo escuro do sistema operacional e deixariam botões e campos transparentes.
+ */
+@custom-variant dark (&:is(.dark *));
+
+/*
  * TOKENS DO DESIGN SYSTEM — fonte única de cores, fontes e raios.
  * Para mudar a identidade visual, altere somente os valores em :root.
  * Nas telas, use sempre as classes derivadas (bg-primary, text-muted-foreground...),
