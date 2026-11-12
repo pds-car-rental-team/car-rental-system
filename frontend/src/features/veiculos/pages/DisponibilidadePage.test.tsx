@@ -72,7 +72,7 @@ describe('DisponibilidadePage', () => {
     httpSpy.mockRestore()
   })
 
-  it('filtra por situação ao clicar no card de resumo ou selecionar nos filtros', async () => {
+  it('filtra por situação ao clicar no card de resumo e por categoria no filtro', async () => {
     const chamadas: Array<{ caminho: string; params?: Record<string, unknown> }> = []
     const httpSpy = vi.spyOn(httpModule, 'http').mockImplementation(async (caminho, opcoes) => {
       chamadas.push({ caminho, params: opcoes?.params })
@@ -99,7 +99,8 @@ describe('DisponibilidadePage', () => {
       chamadas.some((c) => c.caminho === '/veiculos' && c.params?.situacao === 'DISPONIVEL'),
     ).toBe(true)
 
-    await usuario.selectOptions(screen.getByLabelText('Filtrar por categoria'), 'SUV')
+    await usuario.click(screen.getByRole('combobox', { name: 'Filtrar por categoria' }))
+    await usuario.click(await screen.findByRole('option', { name: 'SUV' }))
 
     expect(
       chamadas.some(
