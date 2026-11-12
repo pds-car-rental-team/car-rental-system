@@ -48,6 +48,10 @@ Precisa de uma cor que não existe (ex.: verde para "disponível")? Crie um toke
 
 Não importe outras fontes.
 
+### Tema
+
+O sistema tem um único tema, claro, e não acompanha o modo escuro do sistema operacional (as classes `dark:` dos componentes base ficam desligadas em `index.css`).
+
 ### Forma e espaçamento
 
 - Raio padrão: `rounded-lg` (8px). Selos: `rounded-full`.
@@ -61,15 +65,17 @@ Ficam em `frontend/src/components/`. Use estes antes de criar qualquer coisa.
 | Bloco | Para quê |
 | --- | --- |
 | `PageHeader` | Título da tela, selo de contagem e ações (busca, filtros e botão principal) |
-| `SearchInput` | Campo de busca das listagens (use com `useValorAtrasado`) |
-| `FilterSelect` | Filtro por opção fixa (situação, categoria…), ao lado do `SearchInput`. Nunca escreva `<select>` direto na página |
-| `DataTable` | Tabela de listagem; já trata carregando, erro, vazio e dados; rola por dentro com cabeçalho fixo |
-| `BotaoEditar`, `BotaoExcluir` | Ações da linha: lápis e lixeira vermelha |
+| `SearchInput` | Campo de busca das listagens (use com `useValorAtrasado`). Largura fixa: o texto de ajuda precisa caber inteiro |
+| `Select` | Lista de seleção padrão. **Nunca use `<select>` do HTML.** Em formulário, dentro de um `Field` (passe o `id` do `FieldLabel`) |
+| `FilterSelect` | Filtro de listagem por opção fixa (situação, categoria…), ao lado do `SearchInput`; já inclui a opção "Todas…" |
+| `DataTable` | Tabela de listagem; já trata carregando, erro, vazio e dados; rola por dentro com cabeçalho fixo. Colunas curtas (CPF, placa, valor, selo) recebem `largura: 'w-40'`; as demais dividem o que sobra, e nada muda de lugar quando os dados mudam |
+| `BotaoEditar`, `BotaoExcluir` | Ações da linha: lápis e lixeira vermelha, já com `Tooltip` |
+| `Tooltip` | Dica ao passar o mouse ou focar. Obrigatória em todo botão só com ícone: `<Tooltip texto="Editar"><Button … /></Tooltip>` |
 | `Pagination` | Rodapé "Página X de Y" com Anterior/Próxima |
 | `FormModal`, `FormModalBody`, `FormModalRow`, `FormModalFooter` | Modal de cadastro e edição |
 | `ConfirmDialog` | Confirmação de ação destrutiva |
 
-Base (shadcn/ui), em `frontend/src/components/ui/`: `Button`, `Input`, `Field`/`FieldLabel`/`FieldError`, `Skeleton`, `Dialog`, `AlertDialog`, `Toaster`.
+Base (shadcn/ui), em `frontend/src/components/ui/`: `Button`, `Input`, `Field`/`FieldLabel`/`FieldError`, `Skeleton`, `Dialog`, `AlertDialog`, `Select`, `Tooltip`, `Toaster`. Nas telas, prefira sempre os blocos acima aos componentes base.
 
 ### Botões
 
