@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 
 import { ClientesPage } from '@/features/clientes/pages/ClientesPage'
+import { LocacoesPage } from '@/features/locacoes/pages/LocacoesPage'
 import { DisponibilidadePage } from '@/features/veiculos/pages/DisponibilidadePage'
 import { VeiculosPage } from '@/features/veiculos/pages/VeiculosPage'
 
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
       { path: 'clientes', element: <ClientesPage /> },
       { path: 'veiculos', element: <VeiculosPage /> },
       { path: 'disponibilidade', element: <DisponibilidadePage /> },
+      { path: 'locacoes', element: <LocacoesPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

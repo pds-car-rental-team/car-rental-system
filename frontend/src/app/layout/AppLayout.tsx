@@ -8,6 +8,7 @@ const MENU = [
   { rotulo: 'Clientes', para: '/clientes' },
   { rotulo: 'Veículos', para: '/veiculos' },
   { rotulo: 'Disponibilidade', para: '/disponibilidade' },
+  { rotulo: 'Locações', para: '/locacoes' },
 ]
 
 export function AppLayout() {

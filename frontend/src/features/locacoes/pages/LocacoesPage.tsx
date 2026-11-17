@@ -1,0 +1,109 @@
+import { PlusIcon } from 'lucide-react'
+import { lazy, Suspense, useState } from 'react'
+
+import { DataTable, type Coluna } from '@/components/DataTable'
+import { FilterSelect } from '@/components/FilterSelect'
+import { PageHeader } from '@/components/PageHeader'
+import { Pagination } from '@/components/Pagination'
+import { Button } from '@/components/ui/button'
+
+import { useLocacoes, type Locacao, type StatusLocacao } from '../api'
+import { StatusLocacaoBadge } from '../components/StatusLocacaoBadge'
+import { formatarData, formatarMoeda, formatarPlaca, ROTULO_STATUS } from '../formatters'
+
+// O formulário só é baixado quando o usuário abre o modal pela primeira vez.
+const LocacaoFormModal = lazy(() => import('../components/LocacaoFormModal'))
+
+const OPCOES_STATUS = (Object.keys(ROTULO_STATUS) as StatusLocacao[]).map((valor) => ({
+  valor,
+  rotulo: ROTULO_STATUS[valor],
+}))
+
+const COLUNAS: Coluna<Locacao>[] = [
+  { cabecalho: 'Cliente', celula: (l) => l.clienteNome, principal: true },
+  { cabecalho: 'Veículo', celula: (l) => `${l.veiculoModelo} (${formatarPlaca(l.veiculoPlaca)})` },
+  { cabecalho: 'Retirada', celula: (l) => formatarData(l.dataRetirada), numerica: true, largura: 'w-32' },
+  {
+    cabecalho: 'Devolução',
+    celula: (l) => {
+      if (l.status === 'FINALIZADA' && l.dataDevolucao) {
+        return formatarData(l.dataDevolucao)
+      }
+      if (l.status === 'CANCELADA') {
+        return <span className="text-muted-foreground">—</span>
+      }
+      return (
+        <span>
+          {formatarData(l.dataPrevistaDevolucao)}{' '}
+          <span className="text-xs text-muted-foreground">(prev.)</span>
+        </span>
+      )
+    },
+    numerica: true,
+    largura: 'w-40',
+  },
+  { cabecalho: 'Valor previsto', celula: (l) => formatarMoeda(l.valorPrevisto), numerica: true, largura: 'w-36' },
+  { cabecalho: 'Status', celula: (l) => <StatusLocacaoBadge status={l.status} />, largura: 'w-32' },
+]
+
+interface ModalFormulario {
+  sessao: number
+  aberto: boolean
+}
+
+export function LocacoesPage() {
+  const [status, setStatus] = useState<StatusLocacao | undefined>(undefined)
+  const [pagina, setPagina] = useState(0)
+  const [modal, setModal] = useState<ModalFormulario | null>(null)
+
+  const { data, isPending, error, refetch } = useLocacoes({ status, pagina })
+
+  function abrirModal() {
+    setModal((atual) => ({ sessao: (atual?.sessao ?? 0) + 1, aberto: true }))
+  }
+
+  const contagem =
+    data && `${data.totalItens} ${status ? 'encontradas' : 'registradas'}`.replace(/^1 (\w+)s$/, '1 $1')
+
+  return (
+    <>
+      <PageHeader titulo="Locações" contagem={contagem}>
+        <FilterSelect<StatusLocacao>
+          rotulo="Filtrar por status"
+          rotuloTodos="Todos os status"
+          opcoes={OPCOES_STATUS}
+          valor={status}
+          aoMudar={(novo) => {
+            setStatus(novo)
+            setPagina(0)
+          }}
+        />
+        <Button onClick={abrirModal}>
+          <PlusIcon /> Nova locação
+        </Button>
+      </PageHeader>
+
+      <DataTable
+        colunas={COLUNAS}
+        dados={data?.itens}
+        chave={(locacao) => locacao.id}
+        carregando={isPending}
+        erro={error}
+        aoTentarNovamente={() => refetch()}
+        vazio={status ? 'Nenhuma locação encontrada com este status.' : 'Nenhuma locação registrada ainda.'}
+      />
+
+      {data && <Pagination pagina={data.pagina} totalPaginas={data.totalPaginas} aoMudar={setPagina} />}
+
+      {modal && (
+        <Suspense fallback={null}>
+          <LocacaoFormModal
+            key={modal.sessao}
+            aberto={modal.aberto}
+            aoFechar={() => setModal((atual) => atual && { ...atual, aberto: false })}
+          />
+        </Suspense>
+      )}
+    </>
+  )
+}
