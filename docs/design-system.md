@@ -67,6 +67,7 @@ Ficam em `frontend/src/components/`. Use estes antes de criar qualquer coisa.
 | `PageHeader` | Título da tela, selo de contagem e ações (busca, filtros e botão principal) |
 | `SearchInput` | Campo de busca das listagens (use com `useValorAtrasado`). Largura fixa: o texto de ajuda precisa caber inteiro |
 | `Select` | Lista de seleção padrão. **Nunca use `<select>` do HTML.** Em formulário, dentro de um `Field` (passe o `id` do `FieldLabel`) |
+| `SearchableSelect` | Lista de seleção com busca interna e rolagem própria (`max-h-52`). Use em formulários no lugar de `Select` quando a lista puder crescer (ex.: clientes, veículos) |
 | `FilterSelect` | Filtro de listagem por opção fixa (situação, categoria…), ao lado do `SearchInput`; já inclui a opção "Todas…" |
 | `DataTable` | Tabela de listagem; já trata carregando, erro, vazio e dados; rola por dentro com cabeçalho fixo. Colunas curtas (CPF, placa, valor, selo) recebem `largura: 'w-40'`; as demais dividem o que sobra, e nada muda de lugar quando os dados mudam |
 | `BotaoEditar`, `BotaoExcluir` | Ações da linha: lápis e lixeira vermelha, já com `Tooltip` |
