@@ -1,5 +1,6 @@
-import { CheckIcon, ChevronDownIcon, SearchIcon } from 'lucide-react'
-import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
+import { CheckIcon, ChevronDownIcon } from 'lucide-react'
+import { Popover as PopoverPrimitive } from 'radix-ui'
+import { useId, useRef, useState } from 'react'
 
 import type { OpcaoSelect } from '@/components/Select'
 import { cn } from '@/lib/utils'
@@ -51,10 +52,7 @@ export function SearchableSelect<T extends string>({
   const [aberto, setAberto] = useState(false)
   const [busca, setBusca] = useState('')
   const [ativo, setAtivo] = useState(0)
-  const [estiloPainel, setEstiloPainel] = useState<CSSProperties>({})
 
-  const containerRef = useRef<HTMLDivElement>(null)
-  const triggerRef = useRef<HTMLButtonElement>(null)
   const buscaRef = useRef<HTMLInputElement>(null)
   const listboxId = useId()
 
@@ -69,60 +67,17 @@ export function SearchableSelect<T extends string>({
       })
     : opcoes
 
-  function abrir() {
-    if (disabled) return
-    if (triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect()
-      const espacoAbaixo = window.innerHeight - rect.bottom
-      const abrirAcima = espacoAbaixo < 260 && rect.top > espacoAbaixo
-      setEstiloPainel({
-        position: 'fixed',
-        left: rect.left,
-        width: rect.width,
-        ...(abrirAcima ? { bottom: window.innerHeight - rect.top + 4 } : { top: rect.bottom + 4 }),
-      })
-    }
+  function alterarAbertura(novoAberto: boolean) {
+    if (disabled && novoAberto) return
+    setAberto(novoAberto)
     setBusca('')
     setAtivo(0)
-    setAberto(true)
-  }
-
-  function fechar() {
-    setAberto(false)
-    setBusca('')
   }
 
   function selecionar(opcao: OpcaoSelect<T>) {
     aoMudar(opcao.valor)
-    fechar()
-    triggerRef.current?.focus()
+    alterarAbertura(false)
   }
-
-  useEffect(() => {
-    if (!aberto) return
-    buscaRef.current?.focus()
-
-    function aoClicarFora(evento: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(evento.target as Node)) {
-        fechar()
-      }
-    }
-
-    function aoTeclarGlobal(evento: KeyboardEvent) {
-      if (evento.key === 'Escape') {
-        evento.stopPropagation()
-        fechar()
-        triggerRef.current?.focus()
-      }
-    }
-
-    document.addEventListener('mousedown', aoClicarFora)
-    document.addEventListener('keydown', aoTeclarGlobal)
-    return () => {
-      document.removeEventListener('mousedown', aoClicarFora)
-      document.removeEventListener('keydown', aoTeclarGlobal)
-    }
-  }, [aberto])
 
   function aoTeclarNaBusca(evento: React.KeyboardEvent<HTMLInputElement>) {
     if (evento.key === 'ArrowDown') {
@@ -138,34 +93,42 @@ export function SearchableSelect<T extends string>({
   }
 
   return (
-    <div ref={containerRef} className={cn('relative w-full', className)}>
-      <button
-        ref={triggerRef}
-        id={id}
-        type="button"
-        role="combobox"
-        aria-expanded={aberto}
-        aria-controls={aberto ? listboxId : undefined}
-        aria-haspopup="listbox"
-        aria-invalid={invalido || undefined}
-        disabled={disabled}
-        onClick={() => (aberto ? fechar() : abrir())}
-        className={cn(
-          'flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-input bg-card py-2 pr-3 pl-3.5 text-left text-base md:text-sm transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20',
-          !selecionada && 'text-muted-foreground',
-        )}
-      >
-        <span className="truncate">{selecionada ? selecionada.rotulo : placeholder}</span>
-        <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground" />
-      </button>
-
-      {aberto && (
-        <div
-          style={estiloPainel}
-          className="z-50 flex flex-col overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-lg ring-1 ring-foreground/10"
+    <PopoverPrimitive.Root open={aberto} onOpenChange={alterarAbertura}>
+      <PopoverPrimitive.Trigger asChild>
+        <button
+          id={id}
+          type="button"
+          role="combobox"
+          aria-expanded={aberto}
+          aria-controls={aberto ? listboxId : undefined}
+          aria-haspopup="listbox"
+          aria-invalid={invalido || undefined}
+          disabled={disabled}
+          className={cn(
+            'flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-input bg-card py-2 pr-3 pl-3.5 text-left text-base md:text-sm transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20',
+            !selecionada && 'text-muted-foreground',
+            className,
+          )}
         >
-          <div className="flex items-center gap-2 border-b border-border px-3 py-2">
-            <SearchIcon className="size-4 shrink-0 text-muted-foreground" />
+          <span className="truncate">{selecionada ? selecionada.rotulo : placeholder}</span>
+          <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground" />
+        </button>
+      </PopoverPrimitive.Trigger>
+
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Content
+          side="bottom"
+          align="start"
+          sideOffset={4}
+          collisionPadding={12}
+          onOpenAutoFocus={(evento) => {
+            evento.preventDefault()
+            buscaRef.current?.focus()
+          }}
+          onWheel={(evento) => evento.stopPropagation()}
+          className="z-50 flex w-(--radix-popover-trigger-width) flex-col overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-lg ring-1 ring-foreground/10 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
+        >
+          <div className="border-b border-border p-2">
             <input
               ref={buscaRef}
               type="text"
@@ -177,17 +140,17 @@ export function SearchableSelect<T extends string>({
               onKeyDown={aoTeclarNaBusca}
               placeholder={placeholderBusca}
               aria-label={placeholderBusca}
-              className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+              className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
             />
           </div>
 
           <ul
             id={listboxId}
             role="listbox"
-            className="max-h-52 overflow-y-auto overscroll-contain p-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
+            className="max-h-56 overflow-y-auto overscroll-contain py-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
           >
             {filtradas.length === 0 ? (
-              <li className="px-3 py-2 text-sm text-muted-foreground">{vazio}</li>
+              <li className="px-3.5 py-2.5 text-sm text-muted-foreground">{vazio}</li>
             ) : (
               filtradas.map((opcao, indice) => {
                 const marcado = opcao.valor === valor
@@ -203,7 +166,7 @@ export function SearchableSelect<T extends string>({
                       selecionar(opcao)
                     }}
                     className={cn(
-                      'flex cursor-pointer items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm select-none',
+                      'flex cursor-pointer items-center justify-between gap-2 px-3.5 py-2 text-sm select-none',
                       destacado && 'bg-accent text-accent-foreground',
                       marcado && 'font-medium',
                     )}
@@ -215,8 +178,8 @@ export function SearchableSelect<T extends string>({
               })
             )}
           </ul>
-        </div>
-      )}
-    </div>
+        </PopoverPrimitive.Content>
+      </PopoverPrimitive.Portal>
+    </PopoverPrimitive.Root>
   )
 }
