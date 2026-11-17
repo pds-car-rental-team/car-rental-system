@@ -104,7 +104,7 @@ public class VeiculoService {
         repository.delete(obter(id));
     }
 
-    private Veiculo obter(Long id) {
+    public Veiculo obter(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Veículo não encontrado."));
     }

@@ -74,7 +74,7 @@ public class ClienteService {
         repository.delete(obter(id));
     }
 
-    private Cliente obter(Long id) {
+    public Cliente obter(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente não encontrado."));
     }

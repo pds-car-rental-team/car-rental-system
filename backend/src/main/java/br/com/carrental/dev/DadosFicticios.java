@@ -1,6 +1,7 @@
 package br.com.carrental.dev;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -10,9 +11,13 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 
 import br.com.carrental.cliente.Cliente;
 import br.com.carrental.cliente.ClienteRepository;
+import br.com.carrental.locacao.Locacao;
+import br.com.carrental.locacao.LocacaoRepository;
+import br.com.carrental.locacao.StatusLocacao;
 import br.com.carrental.veiculo.CategoriaVeiculo;
 import br.com.carrental.veiculo.SituacaoVeiculo;
 import br.com.carrental.veiculo.Veiculo;
@@ -49,6 +54,7 @@ public class DadosFicticios {
             new Veiculo("IJB9V01", "Fiat Strada Freedom 1.3", CategoriaVeiculo.UTILITARIO, new BigDecimal("219.90"), SituacaoVeiculo.DISPONIVEL));
 
     @Bean
+    @Order(1)
     ApplicationRunner popularClientes(ClienteRepository repository) {
         return args -> {
             if (repository.count() > 0) {
@@ -61,6 +67,7 @@ public class DadosFicticios {
     }
 
     @Bean
+    @Order(2)
     ApplicationRunner popularVeiculos(VeiculoRepository repository) {
         return args -> {
             if (repository.count() > 0) {
@@ -68,6 +75,93 @@ public class DadosFicticios {
             }
             repository.saveAll(VEICULOS);
             log.info("Perfil dev: {} veículos fictícios cadastrados.", VEICULOS.size());
+        };
+    }
+
+    @Bean
+    @Order(3)
+    ApplicationRunner popularLocacoes(
+            LocacaoRepository locacaoRepository,
+            ClienteRepository clienteRepository,
+            VeiculoRepository veiculoRepository) {
+        return args -> {
+            if (locacaoRepository.count() > 0) {
+                return;
+            }
+            List<Cliente> clientes = clienteRepository.findAll();
+            List<Veiculo> veiculos = veiculoRepository.findAll();
+            if (clientes.isEmpty() || veiculos.isEmpty()) {
+                return;
+            }
+
+            List<Veiculo> alugados = veiculos.stream()
+                    .filter(v -> v.getSituacao() == SituacaoVeiculo.ALUGADO)
+                    .toList();
+            List<Veiculo> naoAlugados = veiculos.stream()
+                    .filter(v -> v.getSituacao() != SituacaoVeiculo.ALUGADO)
+                    .toList();
+
+            LocalDate hoje = LocalDate.now();
+            List<Locacao> locacoes = new java.util.ArrayList<>();
+
+            // Locações abertas correspondentes exatamente aos veículos atualmente alugados.
+            for (int i = 0; i < alugados.size(); i++) {
+                Veiculo veiculo = alugados.get(i);
+                Cliente cliente = clientes.get(i % clientes.size());
+                LocalDate retirada = hoje.minusDays(i);
+                long diarias = 3L + i;
+                locacoes.add(new Locacao(
+                        cliente,
+                        veiculo,
+                        retirada,
+                        retirada.plusDays(diarias),
+                        null,
+                        veiculo.getValorDiaria(),
+                        veiculo.getValorDiaria().multiply(BigDecimal.valueOf(diarias)),
+                        StatusLocacao.ABERTA));
+            }
+
+            // Histórico de locações finalizadas com veículos que hoje não estão alugados.
+            for (int i = 0; i < Math.min(7, naoAlugados.size()); i++) {
+                Veiculo veiculo = naoAlugados.get(i);
+                Cliente cliente = clientes.get((i + alugados.size()) % clientes.size());
+                long diarias = 2L + (i % 4);
+                LocalDate retirada = hoje.minusDays(28L - i * 3L);
+                LocalDate prevista = retirada.plusDays(diarias);
+                LocalDate devolucao = i % 3 == 0 ? prevista.plusDays(1) : prevista;
+                locacoes.add(new Locacao(
+                        cliente,
+                        veiculo,
+                        retirada,
+                        prevista,
+                        devolucao,
+                        veiculo.getValorDiaria(),
+                        veiculo.getValorDiaria().multiply(BigDecimal.valueOf(diarias)),
+                        StatusLocacao.FINALIZADA));
+            }
+
+            // Locações canceladas vinculadas a veículos disponíveis.
+            List<Veiculo> disponiveis = naoAlugados.stream()
+                    .filter(v -> v.getSituacao() == SituacaoVeiculo.DISPONIVEL)
+                    .toList();
+            for (int i = 0; i < Math.min(2, disponiveis.size()); i++) {
+                Veiculo veiculo = disponiveis.get(i);
+                Cliente cliente = clientes.get((i + 10) % clientes.size());
+                LocalDate retirada = hoje.minusDays(10L - i * 4L);
+                long diarias = 2L + i;
+                locacoes.add(new Locacao(
+                        cliente,
+                        veiculo,
+                        retirada,
+                        retirada.plusDays(diarias),
+                        null,
+                        veiculo.getValorDiaria(),
+                        veiculo.getValorDiaria().multiply(BigDecimal.valueOf(diarias)),
+                        StatusLocacao.CANCELADA));
+            }
+
+            locacaoRepository.saveAll(locacoes);
+            log.info("Perfil dev: {} locações fictícias cadastradas.", locacoes.size());
         };
     }
 
