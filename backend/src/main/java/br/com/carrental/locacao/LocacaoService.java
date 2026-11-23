@@ -3,6 +3,7 @@ package br.com.carrental.locacao;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import br.com.carrental.locacao.dto.LocacaoResponse;
 import br.com.carrental.shared.exception.ConflitoException;
 import br.com.carrental.shared.exception.DadosInvalidosException;
 import br.com.carrental.shared.exception.RecursoNaoEncontradoException;
+import br.com.carrental.shared.util.Texto;
 import br.com.carrental.veiculo.SituacaoVeiculo;
 import br.com.carrental.veiculo.Veiculo;
 import br.com.carrental.veiculo.VeiculoService;
@@ -72,11 +74,34 @@ public class LocacaoService {
         return LocacaoResponse.de(locacao);
     }
 
-    public Page<LocacaoResponse> listar(StatusLocacao status, Pageable pageable) {
-        Page<Locacao> locacoes = status == null
-                ? repository.findAll(pageable)
-                : repository.findByStatus(status, pageable);
-        return locacoes.map(LocacaoResponse::de);
+    public Page<LocacaoResponse> listar(FiltroStatusLocacao status, String busca, Pageable pageable) {
+        StatusLocacao statusEntidade = switch (status) {
+            case ABERTA, ATRASADA -> StatusLocacao.ABERTA;
+            case FINALIZADA -> StatusLocacao.FINALIZADA;
+            case CANCELADA -> StatusLocacao.CANCELADA;
+            case null -> null;
+        };
+        boolean somenteNoPrazo = status == FiltroStatusLocacao.ABERTA;
+        boolean somenteAtrasadas = status == FiltroStatusLocacao.ATRASADA;
+        String termo = busca == null ? "" : busca.trim();
+        String buscaCpf = Texto.apenasDigitos(termo);
+        String buscaPlaca = normalizarPlaca(termo);
+
+        return repository
+                .filtrar(
+                        statusEntidade,
+                        somenteNoPrazo,
+                        somenteAtrasadas,
+                        LocalDate.now(),
+                        termo,
+                        buscaCpf,
+                        buscaPlaca,
+                        pageable)
+                .map(LocacaoResponse::de);
+    }
+
+    private static String normalizarPlaca(String valor) {
+        return valor == null ? "" : valor.replaceAll("[^A-Za-z0-9]", "").toUpperCase(Locale.ROOT);
     }
 
     private static void validarDatas(LocalDate dataRetirada, LocalDate dataPrevistaDevolucao) {

@@ -143,6 +143,11 @@ public class Locacao {
         return status;
     }
 
+    /** Uma locação está atrasada quando continua aberta após a data prevista de devolução. */
+    public boolean estaAtrasada(LocalDate referencia) {
+        return status == StatusLocacao.ABERTA && dataPrevistaDevolucao.isBefore(referencia);
+    }
+
     public Instant getCriadoEm() {
         return criadoEm;
     }

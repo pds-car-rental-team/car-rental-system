@@ -39,13 +39,14 @@ public class LocacaoController {
     }
 
     @GetMapping
-    @Operation(summary = "Lista locações com paginação e filtro opcional por status")
+    @Operation(summary = "Lista locações com paginação e filtros opcionais por status (incluindo atrasadas) e busca")
     public PaginaResponse<LocacaoResponse> listar(
-            @RequestParam(required = false) StatusLocacao status,
+            @RequestParam(required = false) FiltroStatusLocacao status,
+            @RequestParam(required = false) String busca,
             @RequestParam(defaultValue = "0") int pagina,
             @RequestParam(defaultValue = "" + Paginacao.TAMANHO_PADRAO) int tamanho) {
         return PaginaResponse.de(
-                service.listar(status, Paginacao.de(pagina, tamanho, Sort.by(Sort.Direction.DESC, "dataRetirada", "id"))));
+                service.listar(status, busca, Paginacao.de(pagina, tamanho, Sort.by(Sort.Direction.DESC, "dataRetirada", "id"))));
     }
 
     @GetMapping("/{id}")
