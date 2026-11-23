@@ -16,7 +16,7 @@ Documentação interativa com a API no ar: `http://localhost:8080/swagger-ui.htm
 | Atualizar | `PUT /clientes/{id}` | 200 + recurso atualizado |
 | Excluir | `DELETE /clientes/{id}` | 204 sem corpo |
 
-- Ações de negócio que não são CRUD viram sub-recurso com `POST`: `POST /locacoes/{id}/devolucao`.
+- Ações de negócio que não são CRUD viram sub-recurso com `POST` ou `PATCH`: `PATCH /locacoes/{id}/devolucao`.
 
 ## JSON
 
