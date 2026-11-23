@@ -11,8 +11,9 @@ import { useLocacoes, type Locacao, type StatusLocacao } from '../api'
 import { StatusLocacaoBadge } from '../components/StatusLocacaoBadge'
 import { formatarData, formatarMoeda, formatarPlaca, ROTULO_STATUS } from '../formatters'
 
-// O formulário só é baixado quando o usuário abre o modal pela primeira vez.
+// Os formulários só são baixados quando o usuário abre o modal pela primeira vez.
 const LocacaoFormModal = lazy(() => import('../components/LocacaoFormModal'))
+const DevolucaoFormModal = lazy(() => import('../components/DevolucaoFormModal'))
 
 const OPCOES_STATUS = (Object.keys(ROTULO_STATUS) as StatusLocacao[]).map((valor) => ({
   valor,
@@ -42,7 +43,12 @@ const COLUNAS: Coluna<Locacao>[] = [
     numerica: true,
     largura: 'w-40',
   },
-  { cabecalho: 'Valor previsto', celula: (l) => formatarMoeda(l.valorPrevisto), numerica: true, largura: 'w-36' },
+  {
+    cabecalho: 'Valor',
+    celula: (l) => formatarMoeda(l.valorFinal ?? l.valorPrevisto),
+    numerica: true,
+    largura: 'w-36',
+  },
   { cabecalho: 'Status', celula: (l) => <StatusLocacaoBadge status={l.status} />, largura: 'w-32' },
 ]
 
@@ -51,15 +57,26 @@ interface ModalFormulario {
   aberto: boolean
 }
 
+interface ModalDevolucao {
+  sessao: number
+  aberto: boolean
+  locacao: Locacao
+}
+
 export function LocacoesPage() {
   const [status, setStatus] = useState<StatusLocacao | undefined>(undefined)
   const [pagina, setPagina] = useState(0)
   const [modal, setModal] = useState<ModalFormulario | null>(null)
+  const [devolucao, setDevolucao] = useState<ModalDevolucao | null>(null)
 
   const { data, isPending, error, refetch } = useLocacoes({ status, pagina })
 
   function abrirModal() {
     setModal((atual) => ({ sessao: (atual?.sessao ?? 0) + 1, aberto: true }))
+  }
+
+  function abrirDevolucao(locacao: Locacao) {
+    setDevolucao((atual) => ({ sessao: (atual?.sessao ?? 0) + 1, aberto: true, locacao }))
   }
 
   const contagem =
@@ -91,6 +108,13 @@ export function LocacoesPage() {
         erro={error}
         aoTentarNovamente={() => refetch()}
         vazio={status ? 'Nenhuma locação encontrada com este status.' : 'Nenhuma locação registrada ainda.'}
+        acoes={(locacao) =>
+          locacao.status === 'ABERTA' ? (
+            <Button variant="outline" size="sm" onClick={() => abrirDevolucao(locacao)}>
+              Devolver
+            </Button>
+          ) : null
+        }
       />
 
       {data && <Pagination pagina={data.pagina} totalPaginas={data.totalPaginas} aoMudar={setPagina} />}
@@ -101,6 +125,17 @@ export function LocacoesPage() {
             key={modal.sessao}
             aberto={modal.aberto}
             aoFechar={() => setModal((atual) => atual && { ...atual, aberto: false })}
+          />
+        </Suspense>
+      )}
+
+      {devolucao && (
+        <Suspense fallback={null}>
+          <DevolucaoFormModal
+            key={devolucao.sessao}
+            aberto={devolucao.aberto}
+            locacao={devolucao.locacao}
+            aoFechar={() => setDevolucao((atual) => atual && { ...atual, aberto: false })}
           />
         </Suspense>
       )}

@@ -27,7 +27,7 @@ const MENSAGEM_PADRAO = 'Não foi possível concluir a operação. Tente novamen
 type Parametros = Record<string, string | number | undefined>
 
 interface Opcoes {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   params?: Parametros
   body?: unknown
   signal?: AbortSignal

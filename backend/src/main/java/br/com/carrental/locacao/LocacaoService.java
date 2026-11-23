@@ -19,6 +19,7 @@ import br.com.carrental.shared.exception.RecursoNaoEncontradoException;
 import br.com.carrental.veiculo.SituacaoVeiculo;
 import br.com.carrental.veiculo.Veiculo;
 import br.com.carrental.veiculo.VeiculoService;
+import br.com.carrental.locacao.dto.DevolucaoRequest;
 
 @Service
 @Transactional(readOnly = true)
@@ -77,6 +78,30 @@ public class LocacaoService {
                 ? repository.findAll(pageable)
                 : repository.findByStatus(status, pageable);
         return locacoes.map(LocacaoResponse::de);
+    }
+
+    @Transactional
+    public LocacaoResponse devolver(Long id, DevolucaoRequest request) {
+        Locacao locacao = repository.findById(id)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Locação não encontrada."));
+
+        if (locacao.getStatus() != StatusLocacao.ABERTA) {
+            throw new ConflitoException("Esta locação não está aberta.");
+        }
+        if (request.situacaoVeiculo() == SituacaoVeiculo.ALUGADO) {
+            throw new DadosInvalidosException("Após a devolução o veículo deve ficar disponível ou em manutenção.");
+        }
+        if (request.dataDevolucao().isBefore(locacao.getDataRetirada())) {
+            throw new DadosInvalidosException("A data de devolução não pode ser anterior à data de retirada.");
+        }
+
+        long diarias = Math.max(1L, ChronoUnit.DAYS.between(locacao.getDataRetirada(), request.dataDevolucao()));
+        BigDecimal valorFinal = locacao.getValorDiaria().multiply(BigDecimal.valueOf(diarias));
+
+        locacao.devolver(request.dataDevolucao(), valorFinal);
+        locacao.getVeiculo().alterarSituacao(request.situacaoVeiculo());
+
+        return LocacaoResponse.de(locacao);
     }
 
     private static void validarDatas(LocalDate dataRetirada, LocalDate dataPrevistaDevolucao) {
