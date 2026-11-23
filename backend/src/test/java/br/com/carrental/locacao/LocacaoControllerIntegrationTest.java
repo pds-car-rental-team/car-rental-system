@@ -3,6 +3,7 @@ package br.com.carrental.locacao;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -273,5 +274,103 @@ class LocacaoControllerIntegrationTest {
     void rejeitaStatusInvalidoNaListagem() throws Exception {
         mvc.perform(get("/api/v1/locacoes").param("status", "INEXISTENTE"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void registraDevolucaoFinalizaLocacaoELiberaVeiculo() throws Exception {
+        veiculoDisponivel.alterarSituacao(SituacaoVeiculo.ALUGADO);
+        veiculoRepository.save(veiculoDisponivel);
+
+        LocalDate retirada = LocalDate.now().minusDays(4);
+        LocalDate prevista = LocalDate.now().minusDays(1);
+        LocalDate devolucao = LocalDate.now();
+        Locacao aberta = locacaoRepository.save(new Locacao(
+                cliente, veiculoDisponivel, retirada, prevista, null,
+                new BigDecimal("120.00"), new BigDecimal("360.00"), StatusLocacao.ABERTA));
+
+        String body = """
+                {"dataDevolucao": "%s", "situacaoVeiculo": "DISPONIVEL"}
+                """.formatted(devolucao);
+
+        mvc.perform(patch("/api/v1/locacoes/{id}/devolucao", aberta.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("FINALIZADA"))
+                .andExpect(jsonPath("$.dataDevolucao").value(devolucao.toString()))
+                .andExpect(jsonPath("$.valorFinal").value(480.00))
+                .andExpect(jsonPath("$.atrasada").value(false));
+
+        Veiculo atualizado = veiculoRepository.findById(veiculoDisponivel.getId()).orElseThrow();
+        assertThat(atualizado.getSituacao()).isEqualTo(SituacaoVeiculo.DISPONIVEL);
+    }
+
+    @Test
+    void registraDevolucaoComVeiculoEmManutencao() throws Exception {
+        veiculoDisponivel.alterarSituacao(SituacaoVeiculo.ALUGADO);
+        veiculoRepository.save(veiculoDisponivel);
+
+        LocalDate retirada = LocalDate.now().minusDays(2);
+        LocalDate devolucao = LocalDate.now();
+        Locacao aberta = locacaoRepository.save(new Locacao(
+                cliente, veiculoDisponivel, retirada, devolucao, null,
+                new BigDecimal("120.00"), new BigDecimal("240.00"), StatusLocacao.ABERTA));
+
+        String body = """
+                {"dataDevolucao": "%s", "situacaoVeiculo": "EM_MANUTENCAO"}
+                """.formatted(devolucao);
+
+        mvc.perform(patch("/api/v1/locacoes/{id}/devolucao", aberta.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("FINALIZADA"))
+                .andExpect(jsonPath("$.valorFinal").value(240.00));
+
+        Veiculo atualizado = veiculoRepository.findById(veiculoDisponivel.getId()).orElseThrow();
+        assertThat(atualizado.getSituacao()).isEqualTo(SituacaoVeiculo.EM_MANUTENCAO);
+    }
+
+    @Test
+    void rejeitaDevolucaoInvalidaInexistenteOuJaFinalizada() throws Exception {
+        LocalDate retirada = LocalDate.now().minusDays(2);
+        Locacao aberta = locacaoRepository.save(new Locacao(
+                cliente, veiculoDisponivel, retirada, LocalDate.now().plusDays(1), null,
+                new BigDecimal("120.00"), new BigDecimal("360.00"), StatusLocacao.ABERTA));
+
+        // 400 - situação ALUGADO não permitida na devolução
+        mvc.perform(patch("/api/v1/locacoes/{id}/devolucao", aberta.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"dataDevolucao": "%s", "situacaoVeiculo": "ALUGADO"}
+                                """.formatted(LocalDate.now())))
+                .andExpect(status().isBadRequest());
+
+        // 400 - data anterior à retirada
+        mvc.perform(patch("/api/v1/locacoes/{id}/devolucao", aberta.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"dataDevolucao": "%s", "situacaoVeiculo": "DISPONIVEL"}
+                                """.formatted(retirada.minusDays(1))))
+                .andExpect(status().isBadRequest());
+
+        // 404 - locação inexistente
+        mvc.perform(patch("/api/v1/locacoes/{id}/devolucao", 99999L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"dataDevolucao": "%s", "situacaoVeiculo": "DISPONIVEL"}
+                                """.formatted(LocalDate.now())))
+                .andExpect(status().isNotFound());
+
+        // Finaliza a locação e tenta devolver novamente -> 409
+        aberta.devolver(LocalDate.now(), new BigDecimal("240.00"));
+        locacaoRepository.save(aberta);
+
+        mvc.perform(patch("/api/v1/locacoes/{id}/devolucao", aberta.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"dataDevolucao": "%s", "situacaoVeiculo": "DISPONIVEL"}
+                                """.formatted(LocalDate.now())))
+                .andExpect(status().isConflict());
     }
 }
