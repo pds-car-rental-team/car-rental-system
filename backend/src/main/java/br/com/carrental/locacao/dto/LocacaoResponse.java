@@ -19,6 +19,7 @@ public record LocacaoResponse(
         LocalDate dataDevolucao,
         BigDecimal valorDiaria,
         BigDecimal valorPrevisto,
+        BigDecimal valorFinal,
         StatusLocacao status,
         Instant criadoEm,
         Instant atualizadoEm) {
@@ -36,6 +37,7 @@ public record LocacaoResponse(
                 locacao.getDataDevolucao(),
                 locacao.getValorDiaria(),
                 locacao.getValorPrevisto(),
+                locacao.getValorFinal(),
                 locacao.getStatus(),
                 locacao.getCriadoEm(),
                 locacao.getAtualizadoEm());
