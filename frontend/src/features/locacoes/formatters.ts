@@ -60,3 +60,12 @@ export function calcularValorPrevisto(
     valorPrevisto: Number((diarias * valorDiaria).toFixed(2)),
   }
 }
+
+/** Diárias cobradas (mínimo 1) e valor final de uma devolução. */
+export function calcularValorFinal(dataRetirada: string, dataDevolucao: string, valorDiaria: number) {
+  const inicio = Date.parse(`${dataRetirada}T00:00:00Z`)
+  const fim = Date.parse(`${dataDevolucao}T00:00:00Z`)
+  if (Number.isNaN(inicio) || Number.isNaN(fim) || fim < inicio) return null
+  const diarias = Math.max(1, Math.round((fim - inicio) / 86_400_000))
+  return { diarias, valorFinal: Number((diarias * valorDiaria).toFixed(2)) }
+}
