@@ -20,6 +20,7 @@ const LOCACOES_MOCK = [
     dataDevolucao: null,
     valorDiaria: 120,
     valorPrevisto: 360,
+    valorFinal: null,
     status: 'ABERTA' as const,
     atrasada: true,
     criadoEm: '2026-11-15T10:00:00Z',
@@ -37,6 +38,7 @@ const LOCACOES_MOCK = [
     dataDevolucao: '2026-11-05',
     valorDiaria: 250,
     valorPrevisto: 1000,
+    valorFinal: 1000,
     status: 'FINALIZADA' as const,
     atrasada: false,
     criadoEm: '2026-11-01T10:00:00Z',
@@ -56,7 +58,7 @@ function renderizarPagina() {
 }
 
 describe('LocacoesPage', () => {
-  it('lista locações com selo de atrasada e botão Devolver desabilitado apenas para abertas', async () => {
+  it('lista locações com selo de atrasada e abre o modal de devolução apenas para abertas', async () => {
     const httpSpy = vi.spyOn(httpModule, 'http').mockResolvedValue({
       itens: LOCACOES_MOCK,
       pagina: 0,
@@ -65,6 +67,7 @@ describe('LocacoesPage', () => {
       totalPaginas: 1,
     })
 
+    const usuario = userEvent.setup()
     renderizarPagina()
 
     expect(await screen.findByText('Maria da Silva')).toBeInTheDocument()
@@ -74,7 +77,10 @@ describe('LocacoesPage', () => {
 
     const botoesDevolver = screen.getAllByRole('button', { name: /Devolver/i })
     expect(botoesDevolver).toHaveLength(1)
-    expect(botoesDevolver[0]).toBeDisabled()
+    expect(botoesDevolver[0]).toBeEnabled()
+
+    await usuario.click(botoesDevolver[0])
+    expect(await screen.findByRole('heading', { name: 'Registrar devolução' })).toBeInTheDocument()
 
     httpSpy.mockRestore()
   })

@@ -27,3 +27,10 @@ export const locacaoSchema = z
   })
 
 export type LocacaoFormValues = z.infer<typeof locacaoSchema>
+
+export const devolucaoSchema = z.object({
+  dataDevolucao: z.string().min(1, 'Informe a data de devolução.'),
+  situacaoVeiculo: z.enum(['DISPONIVEL', 'EM_MANUTENCAO']),
+})
+
+export type DevolucaoFormValues = z.infer<typeof devolucaoSchema>

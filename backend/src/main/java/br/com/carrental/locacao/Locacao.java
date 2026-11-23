@@ -62,6 +62,9 @@ public class Locacao {
     @Column(name = "atualizado_em", nullable = false)
     private Instant atualizadoEm;
 
+    @Column(name = "valor_final", precision = 12, scale = 2)
+    private BigDecimal valorFinal;
+
     protected Locacao() {
         // exigido pelo JPA
     }
@@ -154,5 +157,15 @@ public class Locacao {
 
     public Instant getAtualizadoEm() {
         return atualizadoEm;
+    }
+
+    public void devolver(LocalDate dataDevolucao, BigDecimal valorFinal) {
+        this.dataDevolucao = dataDevolucao;
+        this.valorFinal = valorFinal;
+        this.status = StatusLocacao.FINALIZADA;
+    }
+
+    public BigDecimal getValorFinal() {
+        return valorFinal;
     }
 }

@@ -35,6 +35,7 @@ import br.com.carrental.veiculo.CategoriaVeiculo;
 import br.com.carrental.veiculo.SituacaoVeiculo;
 import br.com.carrental.veiculo.Veiculo;
 import br.com.carrental.veiculo.VeiculoService;
+import br.com.carrental.locacao.dto.DevolucaoRequest;
 
 @ExtendWith(MockitoExtension.class)
 class LocacaoServiceTest {
@@ -58,6 +59,12 @@ class LocacaoServiceTest {
     private static Veiculo veiculoComSituacao(SituacaoVeiculo situacao) {
         return new Veiculo("BRA2E19", "Renault Kwid 1.0 Zen", CategoriaVeiculo.ECONOMICO,
                 new BigDecimal("120.00"), situacao);
+    }
+
+    private static Locacao locacaoAberta(Veiculo veiculo) {
+        return new Locacao(clienteExistente(), veiculo,
+            LocalDate.of(2026, 11, 10), LocalDate.of(2026, 11, 14),
+            new BigDecimal("120.00"), new BigDecimal("480.00"), StatusLocacao.ABERTA);
     }
 
     @Test
@@ -279,5 +286,105 @@ class LocacaoServiceTest {
         assertThat(abertaNoPrazo.estaAtrasada(hoje)).isFalse();
         assertThat(finalizada.estaAtrasada(hoje)).isFalse();
         assertThat(cancelada.estaAtrasada(hoje)).isFalse();
+    }
+
+    @Test
+    void devolverNoPrazoFinalizaLocacaoECobraDiariasUsadas() {
+        Veiculo veiculo = veiculoComSituacao(SituacaoVeiculo.ALUGADO);
+        Locacao locacao = locacaoAberta(veiculo);
+        when(repository.findById(1L)).thenReturn(Optional.of(locacao));
+
+        LocacaoResponse resposta = service.devolver(1L,
+            new DevolucaoRequest(LocalDate.of(2026, 11, 14), SituacaoVeiculo.DISPONIVEL));
+
+        assertThat(resposta.status()).isEqualTo(StatusLocacao.FINALIZADA);
+        assertThat(resposta.dataDevolucao()).isEqualTo(LocalDate.of(2026, 11, 14));
+        assertThat(resposta.valorFinal()).isEqualByComparingTo("480.00");
+        assertThat(veiculo.getSituacao()).isEqualTo(SituacaoVeiculo.DISPONIVEL);
+    }
+
+    @Test
+    void devolverComAtrasoCobraDiariasExtras() {
+        Locacao locacao = locacaoAberta(veiculoComSituacao(SituacaoVeiculo.ALUGADO));
+        when(repository.findById(1L)).thenReturn(Optional.of(locacao));
+
+        LocacaoResponse resposta = service.devolver(1L,
+            new DevolucaoRequest(LocalDate.of(2026, 11, 16), SituacaoVeiculo.DISPONIVEL));
+
+        assertThat(resposta.valorFinal()).isEqualByComparingTo("720.00");
+    }
+
+    @Test
+    void devolverAntecipadoCobraSomenteDiariasUsadas() {
+        Locacao locacao = locacaoAberta(veiculoComSituacao(SituacaoVeiculo.ALUGADO));
+        when(repository.findById(1L)).thenReturn(Optional.of(locacao));
+
+        LocacaoResponse resposta = service.devolver(1L,
+            new DevolucaoRequest(LocalDate.of(2026, 11, 12), SituacaoVeiculo.DISPONIVEL));
+
+        assertThat(resposta.valorFinal()).isEqualByComparingTo("240.00");
+    }
+
+    @Test
+    void devolverNoMesmoDiaDaRetiradaCobraUmaDiaria() {
+        Locacao locacao = locacaoAberta(veiculoComSituacao(SituacaoVeiculo.ALUGADO));
+        when(repository.findById(1L)).thenReturn(Optional.of(locacao));
+
+        LocacaoResponse resposta = service.devolver(1L,
+            new DevolucaoRequest(LocalDate.of(2026, 11, 10), SituacaoVeiculo.DISPONIVEL));
+
+        assertThat(resposta.valorFinal()).isEqualByComparingTo("120.00");
+    }
+
+    @Test
+    void devolverEnviaVeiculoParaManutencaoQuandoEscolhido() {
+        Veiculo veiculo = veiculoComSituacao(SituacaoVeiculo.ALUGADO);
+        when(repository.findById(1L)).thenReturn(Optional.of(locacaoAberta(veiculo)));
+
+        service.devolver(1L, new DevolucaoRequest(LocalDate.of(2026, 11, 14), SituacaoVeiculo.EM_MANUTENCAO));
+
+        assertThat(veiculo.getSituacao()).isEqualTo(SituacaoVeiculo.EM_MANUTENCAO);
+    }
+
+    @Test
+    void devolverBloqueiaLocacaoJaFinalizada() {
+        Locacao locacao = locacaoAberta(veiculoComSituacao(SituacaoVeiculo.ALUGADO));
+        locacao.devolver(LocalDate.of(2026, 11, 14), new BigDecimal("480.00"));
+        when(repository.findById(1L)).thenReturn(Optional.of(locacao));
+
+        assertThatThrownBy(() -> service.devolver(1L,
+            new DevolucaoRequest(LocalDate.of(2026, 11, 15), SituacaoVeiculo.DISPONIVEL)))
+            .isInstanceOf(ConflitoException.class)
+            .hasMessageContaining("aberta");
+    }
+
+    @Test
+    void devolverRejeitaSituacaoAlugadaParaOVeiculo() {
+        when(repository.findById(1L))
+            .thenReturn(Optional.of(locacaoAberta(veiculoComSituacao(SituacaoVeiculo.ALUGADO))));
+
+        assertThatThrownBy(() -> service.devolver(1L,
+            new DevolucaoRequest(LocalDate.of(2026, 11, 14), SituacaoVeiculo.ALUGADO)))
+            .isInstanceOf(DadosInvalidosException.class);
+    }
+
+    @Test
+    void devolverRejeitaDataAnteriorARetirada() {
+        when(repository.findById(1L))
+            .thenReturn(Optional.of(locacaoAberta(veiculoComSituacao(SituacaoVeiculo.ALUGADO))));
+
+        assertThatThrownBy(() -> service.devolver(1L,
+            new DevolucaoRequest(LocalDate.of(2026, 11, 9), SituacaoVeiculo.DISPONIVEL)))
+            .isInstanceOf(DadosInvalidosException.class)
+            .hasMessageContaining("retirada");
+    }
+
+    @Test
+    void devolverLocacaoInexistenteLancaNaoEncontrado() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.devolver(99L,
+            new DevolucaoRequest(LocalDate.of(2026, 11, 14), SituacaoVeiculo.DISPONIVEL)))
+            .isInstanceOf(RecursoNaoEncontradoException.class);
     }
 }

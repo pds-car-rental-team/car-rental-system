@@ -3,7 +3,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { http } from '@/lib/http'
 import { TAMANHO_PAGINA, type Pagina } from '@/lib/pagina'
 
-import type { LocacaoFormValues } from './schema'
+import type { DevolucaoFormValues, LocacaoFormValues } from './schema'
 
 export type StatusLocacao = 'ABERTA' | 'FINALIZADA' | 'CANCELADA'
 export type FiltroStatusLocacao = StatusLocacao | 'ATRASADA'
@@ -20,6 +20,7 @@ export interface Locacao {
   dataDevolucao: string | null
   valorDiaria: number
   valorPrevisto: number
+  valorFinal: number | null
   status: StatusLocacao
   atrasada: boolean
   criadoEm: string
@@ -99,6 +100,20 @@ export function useRegistrarLocacao() {
           dataPrevistaDevolucao: valores.dataPrevistaDevolucao,
         },
       }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: chaves.todos }),
+        queryClient.invalidateQueries({ queryKey: ['veiculos'] }),
+      ])
+    },
+  })
+}
+
+export function useDevolverLocacao() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, valores }: { id: number; valores: DevolucaoFormValues }) =>
+      http<Locacao>(`/locacoes/${id}/devolucao`, { method: 'PATCH', body: valores }),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: chaves.todos }),

@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 import br.com.carrental.locacao.dto.LocacaoRequest;
 import br.com.carrental.locacao.dto.LocacaoResponse;
 import br.com.carrental.shared.web.PaginaResponse;
 import br.com.carrental.shared.web.Paginacao;
+import br.com.carrental.locacao.dto.DevolucaoRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -36,6 +38,12 @@ public class LocacaoController {
     public ResponseEntity<LocacaoResponse> registrar(@Valid @RequestBody LocacaoRequest request) {
         LocacaoResponse locacao = service.registrar(request);
         return ResponseEntity.created(URI.create("/api/v1/locacoes/" + locacao.id())).body(locacao);
+    }
+
+    @PatchMapping("/{id}/devolucao")
+    @Operation(summary = "Registra a devolução e encerra a locação")
+    public LocacaoResponse devolver(@PathVariable Long id, @Valid @RequestBody DevolucaoRequest request) {
+        return service.devolver(id, request);
     }
 
     @GetMapping
