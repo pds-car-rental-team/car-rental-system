@@ -3,12 +3,14 @@ package br.com.carrental.locacao;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import br.com.carrental.cliente.Cliente;
 import br.com.carrental.cliente.ClienteService;
@@ -199,6 +205,87 @@ class LocacaoServiceTest {
 
         assertThatThrownBy(() -> service.buscarPorId(99L))
                 .isInstanceOf(RecursoNaoEncontradoException.class);
+    }
+
+    @Test
+    void listarPorStatusAtrasadaAtivaFiltroDeAtrasadas() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Locacao atrasada = new Locacao(
+                clienteExistente(),
+                veiculoComSituacao(SituacaoVeiculo.ALUGADO),
+                LocalDate.now().minusDays(5),
+                LocalDate.now().minusDays(1),
+                new BigDecimal("120.00"),
+                new BigDecimal("480.00"),
+                StatusLocacao.ABERTA);
+
+        when(repository.filtrar(
+                eq(StatusLocacao.ABERTA), eq(false), eq(true), any(LocalDate.class), eq(""), eq(""), eq(""),
+                eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(atrasada), pageable, 1));
+
+        Page<LocacaoResponse> pagina = service.listar(FiltroStatusLocacao.ATRASADA, null, pageable);
+
+        assertThat(pagina.getTotalElements()).isEqualTo(1);
+        assertThat(pagina.getContent().getFirst().atrasada()).isTrue();
+        verify(repository).filtrar(
+                eq(StatusLocacao.ABERTA), eq(false), eq(true), any(LocalDate.class), eq(""), eq(""), eq(""),
+                eq(pageable));
+    }
+
+    @Test
+    void listarPorStatusAbertaAtivaFiltroSomenteNoPrazo() {
+        Pageable pageable = PageRequest.of(0, 20);
+        when(repository.filtrar(
+                eq(StatusLocacao.ABERTA), eq(true), eq(false), any(LocalDate.class), eq(""), eq(""), eq(""),
+                eq(pageable)))
+                .thenReturn(Page.empty(pageable));
+
+        service.listar(FiltroStatusLocacao.ABERTA, "   ", pageable);
+
+        verify(repository).filtrar(
+                eq(StatusLocacao.ABERTA), eq(true), eq(false), any(LocalDate.class), eq(""), eq(""), eq(""),
+                eq(pageable));
+    }
+
+    @Test
+    void listarNormalizaTermoDeBuscaCpfEPlaca() {
+        Pageable pageable = PageRequest.of(0, 20);
+        when(repository.filtrar(
+                eq(null), eq(false), eq(false), any(LocalDate.class), eq("bra-2e19"), eq("219"), eq("BRA2E19"),
+                eq(pageable)))
+                .thenReturn(Page.empty(pageable));
+
+        service.listar(null, "  bra-2e19  ", pageable);
+
+        verify(repository).filtrar(
+                eq(null), eq(false), eq(false), any(LocalDate.class), eq("bra-2e19"), eq("219"), eq("BRA2E19"),
+                eq(pageable));
+    }
+
+    @Test
+    void estaAtrasadaRetornaVerdadeiroApenasParaLocacaoAbertaComPrevisaoVencida() {
+        LocalDate hoje = LocalDate.now();
+        Cliente cliente = clienteExistente();
+        Veiculo veiculo = veiculoComSituacao(SituacaoVeiculo.ALUGADO);
+
+        Locacao abertaAtrasada = new Locacao(
+                cliente, veiculo, hoje.minusDays(4), hoje.minusDays(1),
+                new BigDecimal("120.00"), new BigDecimal("360.00"), StatusLocacao.ABERTA);
+        Locacao abertaNoPrazo = new Locacao(
+                cliente, veiculo, hoje.minusDays(1), hoje,
+                new BigDecimal("120.00"), new BigDecimal("120.00"), StatusLocacao.ABERTA);
+        Locacao finalizada = new Locacao(
+                cliente, veiculo, hoje.minusDays(5), hoje.minusDays(2), hoje.minusDays(2),
+                new BigDecimal("120.00"), new BigDecimal("360.00"), StatusLocacao.FINALIZADA);
+        Locacao cancelada = new Locacao(
+                cliente, veiculo, hoje.minusDays(5), hoje.minusDays(2),
+                new BigDecimal("120.00"), new BigDecimal("360.00"), StatusLocacao.CANCELADA);
+
+        assertThat(abertaAtrasada.estaAtrasada(hoje)).isTrue();
+        assertThat(abertaNoPrazo.estaAtrasada(hoje)).isFalse();
+        assertThat(finalizada.estaAtrasada(hoje)).isFalse();
+        assertThat(cancelada.estaAtrasada(hoje)).isFalse();
     }
 
     @Test

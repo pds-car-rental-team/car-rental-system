@@ -104,12 +104,14 @@ public class DadosFicticios {
             LocalDate hoje = LocalDate.now();
             List<Locacao> locacoes = new java.util.ArrayList<>();
 
-            // Locações abertas correspondentes exatamente aos veículos atualmente alugados.
+            // Locações abertas correspondentes exatamente aos veículos atualmente alugados
+            // (a última fica atrasada para permitir testar o filtro de atrasadas no ambiente dev).
             for (int i = 0; i < alugados.size(); i++) {
                 Veiculo veiculo = alugados.get(i);
                 Cliente cliente = clientes.get(i % clientes.size());
-                LocalDate retirada = hoje.minusDays(i);
-                long diarias = 3L + i;
+                boolean atrasada = i == alugados.size() - 1;
+                LocalDate retirada = atrasada ? hoje.minusDays(6) : hoje.minusDays(i);
+                long diarias = atrasada ? 3L : 3L + i;
                 locacoes.add(new Locacao(
                         cliente,
                         veiculo,

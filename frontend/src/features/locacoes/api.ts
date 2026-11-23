@@ -6,6 +6,7 @@ import { TAMANHO_PAGINA, type Pagina } from '@/lib/pagina'
 import type { DevolucaoFormValues, LocacaoFormValues } from './schema'
 
 export type StatusLocacao = 'ABERTA' | 'FINALIZADA' | 'CANCELADA'
+export type FiltroStatusLocacao = StatusLocacao | 'ATRASADA'
 
 export interface Locacao {
   id: number
@@ -21,6 +22,7 @@ export interface Locacao {
   valorPrevisto: number
   valorFinal: number | null
   status: StatusLocacao
+  atrasada: boolean
   criadoEm: string
   atualizadoEm: string
 }
@@ -39,7 +41,8 @@ export interface VeiculoOpcao {
 }
 
 export interface FiltroLocacoes {
-  status?: StatusLocacao
+  status?: FiltroStatusLocacao
+  busca?: string
   pagina: number
 }
 
@@ -57,6 +60,7 @@ export function useLocacoes(filtro: FiltroLocacoes) {
       http<Pagina<Locacao>>('/locacoes', {
         params: {
           status: filtro.status,
+          busca: filtro.busca || undefined,
           pagina: filtro.pagina,
           tamanho: TAMANHO_PAGINA,
         },

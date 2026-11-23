@@ -1,4 +1,4 @@
-import type { StatusLocacao } from './api'
+import type { FiltroStatusLocacao, StatusLocacao } from './api'
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -7,6 +7,13 @@ const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
 
 export const ROTULO_STATUS: Record<StatusLocacao, string> = {
   ABERTA: 'Aberta',
+  FINALIZADA: 'Finalizada',
+  CANCELADA: 'Cancelada',
+}
+
+export const ROTULO_FILTRO_STATUS: Record<FiltroStatusLocacao, string> = {
+  ABERTA: 'Aberta',
+  ATRASADA: 'Atrasada',
   FINALIZADA: 'Finalizada',
   CANCELADA: 'Cancelada',
 }
