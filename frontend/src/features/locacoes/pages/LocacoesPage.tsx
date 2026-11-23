@@ -5,18 +5,21 @@ import { DataTable, type Coluna } from '@/components/DataTable'
 import { FilterSelect } from '@/components/FilterSelect'
 import { PageHeader } from '@/components/PageHeader'
 import { Pagination } from '@/components/Pagination'
+import { SearchInput } from '@/components/SearchInput'
+import { Tooltip } from '@/components/Tooltip'
 import { Button } from '@/components/ui/button'
+import { useValorAtrasado } from '@/lib/useValorAtrasado'
 
-import { useLocacoes, type Locacao, type StatusLocacao } from '../api'
+import { useLocacoes, type FiltroStatusLocacao, type Locacao } from '../api'
 import { StatusLocacaoBadge } from '../components/StatusLocacaoBadge'
-import { formatarData, formatarMoeda, formatarPlaca, ROTULO_STATUS } from '../formatters'
+import { formatarData, formatarMoeda, formatarPlaca, ROTULO_FILTRO_STATUS } from '../formatters'
 
 // O formulário só é baixado quando o usuário abre o modal pela primeira vez.
 const LocacaoFormModal = lazy(() => import('../components/LocacaoFormModal'))
 
-const OPCOES_STATUS = (Object.keys(ROTULO_STATUS) as StatusLocacao[]).map((valor) => ({
+const OPCOES_STATUS = (Object.keys(ROTULO_FILTRO_STATUS) as FiltroStatusLocacao[]).map((valor) => ({
   valor,
-  rotulo: ROTULO_STATUS[valor],
+  rotulo: ROTULO_FILTRO_STATUS[valor],
 }))
 
 const COLUNAS: Coluna<Locacao>[] = [
@@ -43,7 +46,11 @@ const COLUNAS: Coluna<Locacao>[] = [
     largura: 'w-40',
   },
   { cabecalho: 'Valor previsto', celula: (l) => formatarMoeda(l.valorPrevisto), numerica: true, largura: 'w-36' },
-  { cabecalho: 'Status', celula: (l) => <StatusLocacaoBadge status={l.status} />, largura: 'w-32' },
+  {
+    cabecalho: 'Status',
+    celula: (l) => <StatusLocacaoBadge status={l.status} atrasada={l.atrasada} />,
+    largura: 'w-32',
+  },
 ]
 
 interface ModalFormulario {
@@ -51,24 +58,48 @@ interface ModalFormulario {
   aberto: boolean
 }
 
+function mensagemListaVazia(busca: string, status: FiltroStatusLocacao | undefined) {
+  if (busca && status) {
+    return `Nenhuma locação encontrada para "${busca}" com o status selecionado.`
+  }
+  if (busca) {
+    return `Nenhuma locação encontrada para "${busca}".`
+  }
+  if (status) {
+    return 'Nenhuma locação encontrada com este status.'
+  }
+  return 'Nenhuma locação registrada ainda.'
+}
+
 export function LocacoesPage() {
-  const [status, setStatus] = useState<StatusLocacao | undefined>(undefined)
+  const [busca, setBusca] = useState('')
+  const [status, setStatus] = useState<FiltroStatusLocacao | undefined>(undefined)
   const [pagina, setPagina] = useState(0)
   const [modal, setModal] = useState<ModalFormulario | null>(null)
 
-  const { data, isPending, error, refetch } = useLocacoes({ status, pagina })
+  const buscaAplicada = useValorAtrasado(busca.trim())
+  const { data, isPending, error, refetch } = useLocacoes({ status, busca: buscaAplicada, pagina })
 
   function abrirModal() {
     setModal((atual) => ({ sessao: (atual?.sessao ?? 0) + 1, aberto: true }))
   }
 
+  const possuiFiltro = Boolean(status || buscaAplicada)
   const contagem =
-    data && `${data.totalItens} ${status ? 'encontradas' : 'registradas'}`.replace(/^1 (\w+)s$/, '1 $1')
+    data && `${data.totalItens} ${possuiFiltro ? 'encontradas' : 'registradas'}`.replace(/^1 (\w+)s$/, '1 $1')
 
   return (
     <>
       <PageHeader titulo="Locações" contagem={contagem}>
-        <FilterSelect<StatusLocacao>
+        <SearchInput
+          rotulo="Buscar por cliente, placa ou modelo"
+          valor={busca}
+          aoMudar={(valor) => {
+            setBusca(valor)
+            setPagina(0)
+          }}
+        />
+        <FilterSelect<FiltroStatusLocacao>
           rotulo="Filtrar por status"
           rotuloTodos="Todos os status"
           opcoes={OPCOES_STATUS}
@@ -90,7 +121,23 @@ export function LocacoesPage() {
         carregando={isPending}
         erro={error}
         aoTentarNovamente={() => refetch()}
-        vazio={status ? 'Nenhuma locação encontrada com este status.' : 'Nenhuma locação registrada ainda.'}
+        vazio={mensagemListaVazia(buscaAplicada, status)}
+        acoes={(locacao) =>
+          locacao.status === 'ABERTA' ? (
+            <Tooltip texto="Devolução disponível após a implementação da SCRUM-15">
+              <span className="inline-flex">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled
+                  aria-label={`Devolver ${locacao.veiculoModelo} (${formatarPlaca(locacao.veiculoPlaca)})`}
+                >
+                  Devolver
+                </Button>
+              </span>
+            </Tooltip>
+          ) : null
+        }
       />
 
       {data && <Pagination pagina={data.pagina} totalPaginas={data.totalPaginas} aoMudar={setPagina} />}
